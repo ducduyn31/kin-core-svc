@@ -113,6 +113,8 @@ func (i *Invitation) Revoke() {
 
 func generateInviteCode() string {
 	b := make([]byte, 16)
-	_, _ = rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		panic("crypto/rand.Read failed: " + err.Error())
+	}
 	return base64.URLEncoding.EncodeToString(b)[:22]
 }
