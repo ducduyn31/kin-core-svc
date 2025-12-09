@@ -55,7 +55,9 @@ func (s *Service) SendMessage(ctx context.Context, cmd SendMessageCommand) (*mes
 	conv, err := s.conversationRepo.GetByID(ctx, cmd.ConversationID)
 	if err == nil {
 		conv.UpdateLastMessage(msg.ID)
-		s.conversationRepo.Update(ctx, conv)
+		if err := s.conversationRepo.Update(ctx, conv); err != nil {
+			s.logger.Error("failed to update conversation last message", "error", err)
+		}
 	}
 
 	participants, err := s.conversationRepo.ListActiveParticipants(ctx, cmd.ConversationID)
@@ -63,7 +65,9 @@ func (s *Service) SendMessage(ctx context.Context, cmd SendMessageCommand) (*mes
 		for _, p := range participants {
 			if p.UserID != cmd.SenderID {
 				receipt := messaging.NewReceipt(msg.ID, p.UserID)
-				s.messageRepo.CreateReceipt(ctx, receipt)
+				if err := s.messageRepo.CreateReceipt(ctx, receipt); err != nil {
+					s.logger.Error("failed to create receipt", "error", err, "user_id", p.UserID)
+				}
 			}
 		}
 	}
