@@ -1,0 +1,274 @@
+{
+  "name": "20251210000400_create_messages",
+  "operations": [
+    {
+      "create_table": {
+        "name": "messages",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "conversation_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "conversations",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "sender_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "content_type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "content_text",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "content_media_id",
+            "type": "uuid",
+            "nullable": true
+          },
+          {
+            "name": "content_media_url",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "content_metadata",
+            "type": "jsonb",
+            "nullable": true
+          },
+          {
+            "name": "reply_to_id",
+            "type": "uuid",
+            "nullable": true,
+            "references": {
+              "table": "messages",
+              "column": "id",
+              "on_delete": "SET NULL"
+            }
+          },
+          {
+            "name": "is_edited",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "edited_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "deleted_for_all",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_messages_conversation_created",
+        "table": "messages",
+        "columns": ["conversation_id", "created_at"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_messages_sender",
+        "table": "messages",
+        "columns": ["sender_id"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "message_receipts",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "message_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "messages",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "status",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'sent'"
+          },
+          {
+            "name": "delivered_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "read_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_receipts_message_user",
+        "table": "message_receipts",
+        "columns": ["message_id", "user_id"],
+        "unique": true
+      }
+    },
+    {
+      "create_table": {
+        "name": "message_reactions",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "message_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "messages",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "emoji",
+            "type": "varchar(50)",
+            "nullable": false
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_reactions_message_user_emoji",
+        "table": "message_reactions",
+        "columns": ["message_id", "user_id", "emoji"],
+        "unique": true
+      }
+    },
+    {
+      "create_table": {
+        "name": "message_deletions",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "message_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "messages",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "deleted_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_deletions_message_user",
+        "table": "message_deletions",
+        "columns": ["message_id", "user_id"],
+        "unique": true
+      }
+    }
+  ]
+}

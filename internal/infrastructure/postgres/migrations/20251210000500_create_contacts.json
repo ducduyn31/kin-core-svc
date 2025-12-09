@@ -1,0 +1,150 @@
+{
+  "name": "20251210000500_create_contacts",
+  "operations": [
+    {
+      "create_table": {
+        "name": "contacts",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "contact_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "nickname",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "name": "is_favorite",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "is_blocked",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_contacts_user_contact",
+        "table": "contacts",
+        "columns": ["user_id", "contact_id"],
+        "unique": true
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_contacts_user",
+        "table": "contacts",
+        "columns": ["user_id"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "contact_requests",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "from_user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "to_user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "message",
+            "type": "varchar(500)",
+            "nullable": true
+          },
+          {
+            "name": "status",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'pending'"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_contact_requests_to_user",
+        "table": "contact_requests",
+        "columns": ["to_user_id", "status"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_contact_requests_from_to",
+        "table": "contact_requests",
+        "columns": ["from_user_id", "to_user_id"]
+      }
+    }
+  ]
+}

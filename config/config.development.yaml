@@ -1,0 +1,10 @@
+server:
+  host: "localhost"
+  port: 8080
+
+logging:
+  level: "debug"
+  format: "text"
+
+s3:
+  use_path_style: true

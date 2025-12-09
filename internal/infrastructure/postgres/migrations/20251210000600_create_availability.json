@@ -1,0 +1,197 @@
+{
+  "name": "20251210000600_create_availability",
+  "operations": [
+    {
+      "create_table": {
+        "name": "user_availability",
+        "columns": [
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "pk": true,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "status",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'free'"
+          },
+          {
+            "name": "status_message",
+            "type": "varchar(200)",
+            "nullable": true
+          },
+          {
+            "name": "manual_until",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "auto_status",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_table": {
+        "name": "availability_windows",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "weekday",
+            "type": "smallint",
+            "nullable": false
+          },
+          {
+            "name": "start_time",
+            "type": "varchar(5)",
+            "nullable": false
+          },
+          {
+            "name": "end_time",
+            "type": "varchar(5)",
+            "nullable": false
+          },
+          {
+            "name": "status",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_availability_windows_user",
+        "table": "availability_windows",
+        "columns": ["user_id"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_availability_windows_user_weekday",
+        "table": "availability_windows",
+        "columns": ["user_id", "weekday"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "availability_auto_rules",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "condition",
+            "type": "jsonb",
+            "nullable": false
+          },
+          {
+            "name": "target_status",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "priority",
+            "type": "integer",
+            "nullable": false,
+            "default": "0"
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_auto_rules_user",
+        "table": "availability_auto_rules",
+        "columns": ["user_id"]
+      }
+    }
+  ]
+}

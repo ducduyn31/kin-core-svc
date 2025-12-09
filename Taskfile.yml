@@ -1,0 +1,166 @@
+version: '3'
+
+vars:
+  BINARY_NAME: kin-api
+  BUILD_DIR: ./bin
+  MAIN_PATH: ./cmd/api
+  MIGRATIONS_DIR: ./internal/infrastructure/postgres/migrations
+  ENV: '{{.ENV | default "development"}}'
+  VERSION: '{{.VERSION | default "dev"}}'
+  GIT_COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
+  BUILD_TIME:
+    sh: date -u +"%Y-%m-%dT%H:%M:%SZ"
+  LDFLAGS: -s -w -X main.Version={{.VERSION}} -X main.GitCommit={{.GIT_COMMIT}} -X main.BuildTime={{.BUILD_TIME}}
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+
+  ## Build
+
+  build:
+    desc: Build the application
+    cmds:
+      - echo "Building {{.BINARY_NAME}} (version={{.VERSION}}, commit={{.GIT_COMMIT}})..."
+      - mkdir -p {{.BUILD_DIR}}
+      - go build -ldflags "{{.LDFLAGS}}" -o {{.BUILD_DIR}}/{{.BINARY_NAME}} {{.MAIN_PATH}}
+
+  run:
+    desc: Run the application
+    cmds:
+      - echo "Running {{.BINARY_NAME}}..."
+      - KIN_ENV={{.ENV}} go run {{.MAIN_PATH}}/main.go
+
+  ## Testing
+
+  test:
+    desc: Run tests
+    cmds:
+      - echo "Running tests..."
+      - go test -v -race -cover ./...
+
+  test:coverage:
+    desc: Run tests with coverage
+    cmds:
+      - echo "Running tests with coverage..."
+      - go test -v -race -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out -o coverage.html
+
+  ## Linting
+
+  lint:
+    desc: Run linter
+    cmds:
+      - echo "Running linter..."
+      - golangci-lint run ./...
+
+  ## Dependencies
+
+  deps:
+    desc: Download dependencies
+    cmds:
+      - echo "Downloading dependencies..."
+      - go mod download
+
+  tidy:
+    desc: Tidy dependencies
+    cmds:
+      - echo "Tidying dependencies..."
+      - go mod tidy
+
+  ## Docker
+
+  docker:up:
+    desc: Start Docker containers
+    cmds:
+      - echo "Starting Docker containers..."
+      - docker-compose up -d
+
+  docker:down:
+    desc: Stop Docker containers
+    cmds:
+      - echo "Stopping Docker containers..."
+      - docker-compose down
+
+  docker:logs:
+    desc: Show Docker logs
+    cmds:
+      - echo "Showing Docker logs..."
+      - docker-compose logs -f
+
+  docker:build:
+    desc: Build Docker image
+    cmds:
+      - echo "Building Docker image..."
+      - docker build -t {{.BINARY_NAME}}:latest .
+
+  ## Database Migrations (pgroll)
+
+  migrate:new:
+    desc: Create a new migration file (task migrate:new NAME="create foo")
+    cmds:
+      - |
+        TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+        SAFE_NAME=$(echo "{{.NAME}}" | tr ' ' '_')
+        FILENAME="${TIMESTAMP}_${SAFE_NAME}.json"
+        pgroll create --empty --json --name "${SAFE_NAME}" > {{.MIGRATIONS_DIR}}/$FILENAME
+        echo "Created migration: {{.MIGRATIONS_DIR}}/$FILENAME"
+    requires:
+      vars: [NAME]
+
+  migrate:up:
+    desc: Run all migrations
+    cmds:
+      - echo "Running all migrations..."
+      - |
+        for file in {{.MIGRATIONS_DIR}}/*.json; do
+          echo "Starting migration: $file"
+          pgroll start "$file"
+          pgroll complete
+        done
+
+  migrate:start:
+    desc: Start a specific migration (task migrate:start FILE=xxx.json)
+    cmds:
+      - echo "Starting migration {{.FILE}}..."
+      - pgroll start {{.MIGRATIONS_DIR}}/{{.FILE}}
+    requires:
+      vars: [FILE]
+
+  migrate:complete:
+    desc: Complete current migration
+    cmds:
+      - echo "Completing migration..."
+      - pgroll complete
+
+  migrate:rollback:
+    desc: Rollback current migration
+    cmds:
+      - echo "Rolling back migration..."
+      - pgroll rollback
+
+  migrate:status:
+    desc: Show migration status
+    cmds:
+      - echo "Migration status..."
+      - pgroll status
+
+  ## Bob Code Generation
+
+  bob:generate:
+    desc: Generate Bob models
+    cmds:
+      - echo "Generating Bob models..."
+      - bob-gen psql
+
+  ## Clean
+
+  clean:
+    desc: Clean build artifacts
+    cmds:
+      - echo "Cleaning..."
+      - rm -rf {{.BUILD_DIR}}
+      - rm -f coverage.out coverage.html

@@ -1,0 +1,162 @@
+{
+  "name": "20251210000100_create_users",
+  "operations": [
+    {
+      "create_table": {
+        "name": "users",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "auth0_sub",
+            "type": "varchar(255)",
+            "unique": true,
+            "nullable": false
+          },
+          {
+            "name": "display_name",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "avatar",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "bio",
+            "type": "varchar(500)",
+            "nullable": true
+          },
+          {
+            "name": "phone_number",
+            "type": "varchar(20)",
+            "nullable": true
+          },
+          {
+            "name": "timezone",
+            "type": "varchar(50)",
+            "nullable": false,
+            "default": "'UTC'"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_users_auth0_sub",
+        "table": "users",
+        "columns": ["auth0_sub"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_users_phone_number",
+        "table": "users",
+        "columns": ["phone_number"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "user_preferences",
+        "columns": [
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "pk": true,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "default_privacy_level",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'basic'"
+          },
+          {
+            "name": "show_online_status",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "show_last_seen",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "show_read_receipts",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "allow_contact_discovery",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "push_notifications",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "email_notifications",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "quiet_hours_enabled",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "quiet_hours_start",
+            "type": "varchar(5)",
+            "nullable": true
+          },
+          {
+            "name": "quiet_hours_end",
+            "type": "varchar(5)",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    }
+  ]
+}

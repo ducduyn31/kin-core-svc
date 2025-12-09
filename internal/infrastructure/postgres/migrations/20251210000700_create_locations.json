@@ -1,0 +1,299 @@
+{
+  "name": "20251210000700_create_locations",
+  "operations": [
+    {
+      "create_table": {
+        "name": "user_locations",
+        "columns": [
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "pk": true,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "latitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "longitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "accuracy",
+            "type": "double precision",
+            "nullable": true
+          },
+          {
+            "name": "altitude",
+            "type": "double precision",
+            "nullable": true
+          },
+          {
+            "name": "speed",
+            "type": "double precision",
+            "nullable": true
+          },
+          {
+            "name": "heading",
+            "type": "double precision",
+            "nullable": true
+          },
+          {
+            "name": "place_id",
+            "type": "uuid",
+            "nullable": true
+          },
+          {
+            "name": "country",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "name": "city",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "name": "neighborhood",
+            "type": "varchar(200)",
+            "nullable": true
+          },
+          {
+            "name": "address",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "is_moving",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_table": {
+        "name": "location_history",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "latitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "longitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "accuracy",
+            "type": "double precision",
+            "nullable": true
+          },
+          {
+            "name": "place_id",
+            "type": "uuid",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_location_history_user_created",
+        "table": "location_history",
+        "columns": ["user_id", "created_at"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "places",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "latitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "longitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "radius",
+            "type": "double precision",
+            "nullable": false,
+            "default": "100"
+          },
+          {
+            "name": "address",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "icon",
+            "type": "varchar(50)",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_places_user",
+        "table": "places",
+        "columns": ["user_id"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "check_ins",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "place_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "places",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "latitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "longitude",
+            "type": "double precision",
+            "nullable": false
+          },
+          {
+            "name": "note",
+            "type": "varchar(500)",
+            "nullable": true
+          },
+          {
+            "name": "auto_check",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_check_ins_user_created",
+        "table": "check_ins",
+        "columns": ["user_id", "created_at"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_check_ins_place",
+        "table": "check_ins",
+        "columns": ["place_id"]
+      }
+    }
+  ]
+}

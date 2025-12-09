@@ -1,0 +1,320 @@
+{
+  "name": "20251210000200_create_circles",
+  "operations": [
+    {
+      "create_table": {
+        "name": "circles",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "description",
+            "type": "varchar(500)",
+            "nullable": true
+          },
+          {
+            "name": "avatar",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "created_by",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circles_created_by",
+        "table": "circles",
+        "columns": ["created_by"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "circle_members",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "circle_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "circles",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "role",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'member'"
+          },
+          {
+            "name": "nickname",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "name": "joined_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circle_members_circle_user",
+        "table": "circle_members",
+        "columns": ["circle_id", "user_id"],
+        "unique": true
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circle_members_user",
+        "table": "circle_members",
+        "columns": ["user_id"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "circle_sharing_preferences",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "circle_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "circles",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "privacy_level",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'basic'"
+          },
+          {
+            "name": "share_timezone",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "share_availability",
+            "type": "boolean",
+            "nullable": false,
+            "default": "true"
+          },
+          {
+            "name": "share_location",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "location_precision",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'city'"
+          },
+          {
+            "name": "share_activity",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circle_sharing_circle_user",
+        "table": "circle_sharing_preferences",
+        "columns": ["circle_id", "user_id"],
+        "unique": true
+      }
+    },
+    {
+      "create_table": {
+        "name": "circle_invitations",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "circle_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "circles",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "inviter_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "invitee_id",
+            "type": "uuid",
+            "nullable": true,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "code",
+            "type": "varchar(50)",
+            "unique": true,
+            "nullable": false
+          },
+          {
+            "name": "status",
+            "type": "varchar(20)",
+            "nullable": false,
+            "default": "'pending'"
+          },
+          {
+            "name": "max_uses",
+            "type": "integer",
+            "nullable": true
+          },
+          {
+            "name": "use_count",
+            "type": "integer",
+            "nullable": false,
+            "default": "0"
+          },
+          {
+            "name": "expires_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circle_invitations_code",
+        "table": "circle_invitations",
+        "columns": ["code"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_circle_invitations_invitee",
+        "table": "circle_invitations",
+        "columns": ["invitee_id"]
+      }
+    }
+  ]
+}

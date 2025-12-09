@@ -1,0 +1,17 @@
+psql:
+  dsn: ${DATABASE_URL}
+  output: internal/infrastructure/postgres/models
+  pkgname: models
+  no_factory: false
+  no_tests: true
+  concurrency: 5
+  except:
+    - pgroll.migrations
+  add_enum_types: true
+  enum:
+    package: enums
+  types:
+    uuid.UUID:
+      - uuid
+  imports:
+    - github.com/google/uuid

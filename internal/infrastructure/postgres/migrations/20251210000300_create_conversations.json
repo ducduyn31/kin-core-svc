@@ -1,0 +1,159 @@
+{
+  "name": "20251210000300_create_conversations",
+  "operations": [
+    {
+      "create_table": {
+        "name": "conversations",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "circle_id",
+            "type": "uuid",
+            "nullable": true,
+            "references": {
+              "table": "circles",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "name",
+            "type": "varchar(100)",
+            "nullable": true
+          },
+          {
+            "name": "avatar",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "last_message_id",
+            "type": "uuid",
+            "nullable": true
+          },
+          {
+            "name": "last_message_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_conversations_circle",
+        "table": "conversations",
+        "columns": ["circle_id"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_conversations_last_message",
+        "table": "conversations",
+        "columns": ["last_message_at"]
+      }
+    },
+    {
+      "create_table": {
+        "name": "conversation_participants",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "conversation_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "conversations",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "is_muted",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "is_archived",
+            "type": "boolean",
+            "nullable": false,
+            "default": "false"
+          },
+          {
+            "name": "last_read_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "joined_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          },
+          {
+            "name": "left_at",
+            "type": "timestamptz",
+            "nullable": true
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_participants_conversation_user",
+        "table": "conversation_participants",
+        "columns": ["conversation_id", "user_id"],
+        "unique": true
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_participants_user",
+        "table": "conversation_participants",
+        "columns": ["user_id"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+  read_timeout: 30s
+  write_timeout: 30s
+  shutdown_timeout: 10s
+
+database:
+  max_open_conns: 25
+  max_idle_conns: 5
+  conn_max_lifetime: 5m
+  conn_max_idle_time: 5m
+
+redis:
+  max_retries: 3
+  pool_size: 10
+  min_idle_conns: 5
+  dial_timeout: 5s
+  read_timeout: 3s
+  write_timeout: 3s
+
+s3:
+  use_path_style: true
+
+auth:
+  token_lookup: "header:Authorization"
+  auth_scheme: "Bearer"
+
+logging:
+  level: "info"
+  format: "json"
+
+presence:
+  ttl: 5m
+  cleanup_interval: 1m
+
+pagination:
+  default_limit: 20
+  max_limit: 100

@@ -1,0 +1,102 @@
+{
+  "name": "20251210000800_create_media",
+  "operations": [
+    {
+      "create_table": {
+        "name": "media",
+        "columns": [
+          {
+            "name": "id",
+            "type": "uuid",
+            "pk": true
+          },
+          {
+            "name": "user_id",
+            "type": "uuid",
+            "nullable": false,
+            "references": {
+              "table": "users",
+              "column": "id",
+              "on_delete": "CASCADE"
+            }
+          },
+          {
+            "name": "type",
+            "type": "varchar(20)",
+            "nullable": false
+          },
+          {
+            "name": "file_name",
+            "type": "varchar(255)",
+            "nullable": false
+          },
+          {
+            "name": "file_size",
+            "type": "bigint",
+            "nullable": false
+          },
+          {
+            "name": "mime_type",
+            "type": "varchar(100)",
+            "nullable": false
+          },
+          {
+            "name": "storage_key",
+            "type": "text",
+            "nullable": false
+          },
+          {
+            "name": "url",
+            "type": "text",
+            "nullable": false
+          },
+          {
+            "name": "thumbnail_key",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "thumbnail_url",
+            "type": "text",
+            "nullable": true
+          },
+          {
+            "name": "width",
+            "type": "integer",
+            "nullable": true
+          },
+          {
+            "name": "height",
+            "type": "integer",
+            "nullable": true
+          },
+          {
+            "name": "duration",
+            "type": "integer",
+            "nullable": true
+          },
+          {
+            "name": "created_at",
+            "type": "timestamptz",
+            "nullable": false,
+            "default": "now()"
+          }
+        ]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_media_user",
+        "table": "media",
+        "columns": ["user_id"]
+      }
+    },
+    {
+      "create_index": {
+        "name": "idx_media_storage_key",
+        "table": "media",
+        "columns": ["storage_key"]
+      }
+    }
+  ]
+}
