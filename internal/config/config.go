@@ -127,25 +127,25 @@ func Load() (*Config, error) {
 }
 
 func bindEnvVars(v *viper.Viper) {
-	v.BindEnv("database.write_url", "DATABASE_WRITE_URL")
-	v.BindEnv("database.read_url", "DATABASE_READ_URL")
+	_ = v.BindEnv("database.write_url", "DATABASE_WRITE_URL")
+	_ = v.BindEnv("database.read_url", "DATABASE_READ_URL")
 
-	v.BindEnv("redis.url", "REDIS_URL")
+	_ = v.BindEnv("redis.url", "REDIS_URL")
 
-	v.BindEnv("s3.endpoint", "S3_ENDPOINT")
-	v.BindEnv("s3.region", "S3_REGION")
-	v.BindEnv("s3.access_key", "S3_ACCESS_KEY")
-	v.BindEnv("s3.secret_key", "S3_SECRET_KEY")
-	v.BindEnv("s3.bucket", "S3_BUCKET")
+	_ = v.BindEnv("s3.endpoint", "S3_ENDPOINT")
+	_ = v.BindEnv("s3.region", "S3_REGION")
+	_ = v.BindEnv("s3.access_key", "S3_ACCESS_KEY")
+	_ = v.BindEnv("s3.secret_key", "S3_SECRET_KEY")
+	_ = v.BindEnv("s3.bucket", "S3_BUCKET")
 
-	v.BindEnv("auth.domain", "AUTH0_DOMAIN")
-	v.BindEnv("auth.audience", "AUTH0_AUDIENCE")
+	_ = v.BindEnv("auth.domain", "AUTH0_DOMAIN")
+	_ = v.BindEnv("auth.audience", "AUTH0_AUDIENCE")
 
-	v.BindEnv("server.port", "SERVER_PORT")
-	v.BindEnv("server.host", "SERVER_HOST")
+	_ = v.BindEnv("server.port", "SERVER_PORT")
+	_ = v.BindEnv("server.host", "SERVER_HOST")
 
-	v.BindEnv("telemetry.enabled", "OTEL_ENABLED")
-	v.BindEnv("telemetry.otlp_endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT")
+	_ = v.BindEnv("telemetry.enabled", "OTEL_ENABLED")
+	_ = v.BindEnv("telemetry.otlp_endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT")
 }
 
 func setDefaults(cfg *Config) {
