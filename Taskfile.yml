@@ -1,5 +1,7 @@
 version: '3'
 
+dotenv: ['.env']
+
 vars:
   BINARY_NAME: kin-api
   BUILD_DIR: ./bin
@@ -33,6 +35,12 @@ tasks:
     cmds:
       - echo "Running {{.BINARY_NAME}}..."
       - KIN_ENV={{.ENV}} go run {{.MAIN_PATH}}/main.go
+
+  dev:
+    desc: Run with hot reload (air)
+    cmds:
+      - echo "Starting development server with hot reload..."
+      - air
 
   ## Testing
 
