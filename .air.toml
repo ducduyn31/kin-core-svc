@@ -8,7 +8,7 @@ tmp_dir = "tmp"
   exclude_dir = ["assets", "tmp", "vendor", "node_modules", "bin"]
   exclude_file = []
   exclude_regex = ["_test.go"]
-  exclude_unchanged = false
+  exclude_unchanged = true
   follow_symlink = false
   full_bin = "KIN_ENV=development ./tmp/main"
   include_dir = []
