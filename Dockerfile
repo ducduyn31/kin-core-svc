@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 ARG VERSION=dev
 ARG GIT_COMMIT=unknown
@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build \
     -o /bin/kin-api ./cmd/api
 
 # Final stage
-FROM alpine:3.19
+FROM alpine:3.23
 
 WORKDIR /app
 
