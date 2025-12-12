@@ -103,9 +103,9 @@ kin/
 ├── cmd/api/              # Application entry point
 ├── proto/                # Protocol buffer definitions
 │   └── kin/v1/           # API version 1 protos
-├── gen/                  # Generated code (gitignored)
-│   ├── proto/            # Generated protobuf/gRPC code
-│   └── openapi/          # Generated OpenAPI specs
+├── gen/                  # Generated protobuf/gRPC code
+│   ├── proto/            # Go protobuf and gRPC stubs
+│   └── openapi/          # OpenAPI specs
 ├── internal/
 │   ├── config/           # Configuration management
 │   ├── domain/           # Business logic (DDD aggregates)

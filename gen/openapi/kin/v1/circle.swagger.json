@@ -1,0 +1,896 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kin/v1/circle.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "CircleService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/circles": {
+      "get": {
+        "summary": "ListCircles returns circles the authenticated user belongs to",
+        "operationId": "CircleService_ListCircles",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListCirclesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      },
+      "post": {
+        "summary": "CreateCircle creates a new circle",
+        "operationId": "CircleService_CreateCircle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateCircleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateCircleRequest"
+            }
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/join": {
+      "post": {
+        "summary": "AcceptInvitation accepts an invitation to join a circle",
+        "operationId": "CircleService_AcceptInvitation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AcceptInvitationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}": {
+      "get": {
+        "summary": "GetCircle returns a specific circle by ID",
+        "operationId": "CircleService_GetCircle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetCircleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      },
+      "delete": {
+        "summary": "DeleteCircle deletes a circle",
+        "operationId": "CircleService_DeleteCircle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteCircleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      },
+      "put": {
+        "summary": "UpdateCircle updates a circle's details",
+        "operationId": "CircleService_UpdateCircle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateCircleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CircleServiceUpdateCircleBody"
+            }
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}/invitations": {
+      "post": {
+        "summary": "CreateInvitation creates an invitation to join a circle",
+        "operationId": "CircleService_CreateInvitation",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateInvitationResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CircleServiceCreateInvitationBody"
+            }
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}/leave": {
+      "post": {
+        "summary": "LeaveCircle allows a member to leave a circle",
+        "operationId": "CircleService_LeaveCircle",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1LeaveCircleResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}/members": {
+      "get": {
+        "summary": "ListMembers returns members of a circle",
+        "operationId": "CircleService_ListMembers",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListMembersResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      },
+      "post": {
+        "summary": "AddMember adds a member to a circle",
+        "operationId": "CircleService_AddMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1AddMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CircleServiceAddMemberBody"
+            }
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}/members/{memberId}": {
+      "delete": {
+        "summary": "RemoveMember removes a member from a circle",
+        "operationId": "CircleService_RemoveMember",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1RemoveMemberResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    },
+    "/api/v1/circles/{circleId}/sharing": {
+      "get": {
+        "summary": "GetSharingPreference returns sharing preferences for a circle",
+        "operationId": "CircleService_GetSharingPreference",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetSharingPreferenceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      },
+      "put": {
+        "summary": "UpdateSharingPreference updates sharing preferences for a circle",
+        "operationId": "CircleService_UpdateSharingPreference",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateSharingPreferenceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "circleId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CircleServiceUpdateSharingPreferenceBody"
+            }
+          }
+        ],
+        "tags": [
+          "CircleService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "CircleServiceAddMemberBody": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1MemberRole"
+        }
+      },
+      "title": "AddMember messages"
+    },
+    "CircleServiceCreateInvitationBody": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/v1InvitationType"
+        },
+        "inviteeId": {
+          "type": "string"
+        },
+        "maxUses": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "expiresInHours": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "CreateInvitation messages"
+    },
+    "CircleServiceUpdateCircleBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateCircle messages"
+    },
+    "CircleServiceUpdateSharingPreferenceBody": {
+      "type": "object",
+      "properties": {
+        "privacyLevel": {
+          "$ref": "#/definitions/v1PrivacyLevel"
+        },
+        "shareTimezone": {
+          "type": "boolean"
+        },
+        "shareAvailability": {
+          "type": "boolean"
+        },
+        "shareLocation": {
+          "type": "boolean"
+        },
+        "locationPrecision": {
+          "$ref": "#/definitions/v1LocationPrecision"
+        },
+        "shareActivity": {
+          "type": "boolean"
+        }
+      },
+      "title": "UpdateSharingPreference messages"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1AcceptInvitationResponse": {
+      "type": "object",
+      "properties": {
+        "circle": {
+          "$ref": "#/definitions/v1Circle"
+        }
+      }
+    },
+    "v1AddMemberResponse": {
+      "type": "object",
+      "properties": {
+        "member": {
+          "$ref": "#/definitions/v1Member"
+        }
+      }
+    },
+    "v1Circle": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Circle represents a kin circle"
+    },
+    "v1CreateCircleRequest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "CreateCircle messages"
+    },
+    "v1CreateCircleResponse": {
+      "type": "object",
+      "properties": {
+        "circle": {
+          "$ref": "#/definitions/v1Circle"
+        }
+      }
+    },
+    "v1CreateInvitationResponse": {
+      "type": "object",
+      "properties": {
+        "invitation": {
+          "$ref": "#/definitions/v1Invitation"
+        }
+      }
+    },
+    "v1DeleteCircleResponse": {
+      "type": "object"
+    },
+    "v1GetCircleResponse": {
+      "type": "object",
+      "properties": {
+        "circle": {
+          "$ref": "#/definitions/v1Circle"
+        }
+      }
+    },
+    "v1GetSharingPreferenceResponse": {
+      "type": "object",
+      "properties": {
+        "sharingPreference": {
+          "$ref": "#/definitions/v1SharingPreference"
+        }
+      }
+    },
+    "v1Invitation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "circleId": {
+          "type": "string"
+        },
+        "inviterId": {
+          "type": "string"
+        },
+        "inviteeId": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/v1InvitationType"
+        },
+        "code": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1InvitationStatus"
+        },
+        "maxUses": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "useCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Invitation represents a circle invitation"
+    },
+    "v1InvitationStatus": {
+      "type": "string",
+      "enum": [
+        "INVITATION_STATUS_UNSPECIFIED",
+        "INVITATION_STATUS_PENDING",
+        "INVITATION_STATUS_ACCEPTED",
+        "INVITATION_STATUS_EXPIRED",
+        "INVITATION_STATUS_REVOKED"
+      ],
+      "default": "INVITATION_STATUS_UNSPECIFIED",
+      "title": "Invitation status enum"
+    },
+    "v1InvitationType": {
+      "type": "string",
+      "enum": [
+        "INVITATION_TYPE_UNSPECIFIED",
+        "INVITATION_TYPE_DIRECT",
+        "INVITATION_TYPE_LINK"
+      ],
+      "default": "INVITATION_TYPE_UNSPECIFIED",
+      "description": "- INVITATION_TYPE_DIRECT: Direct invite to a specific user\n - INVITATION_TYPE_LINK: Invite link anyone can use",
+      "title": "Invitation type enum"
+    },
+    "v1LeaveCircleResponse": {
+      "type": "object"
+    },
+    "v1ListCirclesResponse": {
+      "type": "object",
+      "properties": {
+        "circles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Circle"
+          }
+        },
+        "meta": {
+          "$ref": "#/definitions/v1PaginationMeta"
+        }
+      }
+    },
+    "v1ListMembersResponse": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Member"
+          }
+        }
+      }
+    },
+    "v1LocationPrecision": {
+      "type": "string",
+      "enum": [
+        "LOCATION_PRECISION_UNSPECIFIED",
+        "LOCATION_PRECISION_COUNTRY",
+        "LOCATION_PRECISION_CITY",
+        "LOCATION_PRECISION_NEIGHBORHOOD",
+        "LOCATION_PRECISION_EXACT"
+      ],
+      "default": "LOCATION_PRECISION_UNSPECIFIED",
+      "title": "Location precision enum"
+    },
+    "v1Member": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "circleId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "role": {
+          "$ref": "#/definitions/v1MemberRole"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Member represents a circle member"
+    },
+    "v1MemberRole": {
+      "type": "string",
+      "enum": [
+        "MEMBER_ROLE_UNSPECIFIED",
+        "MEMBER_ROLE_ADMIN",
+        "MEMBER_ROLE_MEMBER"
+      ],
+      "default": "MEMBER_ROLE_UNSPECIFIED",
+      "title": "Member role enum"
+    },
+    "v1PaginationMeta": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "perPage": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "total": {
+          "type": "string",
+          "format": "int64"
+        },
+        "nextCursor": {
+          "type": "string"
+        }
+      },
+      "title": "Pagination metadata in responses"
+    },
+    "v1PrivacyLevel": {
+      "type": "string",
+      "enum": [
+        "PRIVACY_LEVEL_UNSPECIFIED",
+        "PRIVACY_LEVEL_BASIC",
+        "PRIVACY_LEVEL_STATUS",
+        "PRIVACY_LEVEL_ACTIVITY",
+        "PRIVACY_LEVEL_LOCATION"
+      ],
+      "default": "PRIVACY_LEVEL_UNSPECIFIED",
+      "description": "- PRIVACY_LEVEL_BASIC: Online/offline, timezone\n - PRIVACY_LEVEL_STATUS: At home, At work, Commuting, Sleeping\n - PRIVACY_LEVEL_ACTIVITY: Current activity, estimated free time\n - PRIVACY_LEVEL_LOCATION: Real-time location sharing",
+      "title": "Privacy level enum used across user and circle domains"
+    },
+    "v1RemoveMemberResponse": {
+      "type": "object"
+    },
+    "v1SharingPreference": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "circleId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "privacyLevel": {
+          "$ref": "#/definitions/v1PrivacyLevel"
+        },
+        "shareTimezone": {
+          "type": "boolean"
+        },
+        "shareAvailability": {
+          "type": "boolean"
+        },
+        "shareLocation": {
+          "type": "boolean"
+        },
+        "locationPrecision": {
+          "$ref": "#/definitions/v1LocationPrecision"
+        },
+        "shareActivity": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "SharingPreference represents per-circle sharing settings"
+    },
+    "v1UpdateCircleResponse": {
+      "type": "object",
+      "properties": {
+        "circle": {
+          "$ref": "#/definitions/v1Circle"
+        }
+      }
+    },
+    "v1UpdateSharingPreferenceResponse": {
+      "type": "object",
+      "properties": {
+        "sharingPreference": {
+          "$ref": "#/definitions/v1SharingPreference"
+        }
+      }
+    }
+  }
+}

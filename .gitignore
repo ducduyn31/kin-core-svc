@@ -46,6 +46,5 @@ temp/
 # Build artifacts
 dist/
 
-# Generated files
+# Generated files (Bob models)
 internal/infrastructure/postgres/models/
-gen/

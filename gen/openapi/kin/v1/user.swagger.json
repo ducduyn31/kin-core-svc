@@ -1,0 +1,388 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kin/v1/user.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "UserService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/users/me": {
+      "get": {
+        "summary": "GetMe returns the authenticated user's profile",
+        "operationId": "UserService_GetMe",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetMeResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UserService"
+        ]
+      },
+      "put": {
+        "summary": "UpdateProfile updates the authenticated user's profile",
+        "operationId": "UserService_UpdateProfile",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateProfileResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateProfileRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/users/me/preferences": {
+      "get": {
+        "summary": "GetPreferences returns the authenticated user's preferences",
+        "operationId": "UserService_GetPreferences",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetPreferencesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "tags": [
+          "UserService"
+        ]
+      },
+      "put": {
+        "summary": "UpdatePreferences updates the authenticated user's preferences",
+        "operationId": "UserService_UpdatePreferences",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdatePreferencesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdatePreferencesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    },
+    "/api/v1/users/me/timezone": {
+      "put": {
+        "summary": "UpdateTimezone updates the authenticated user's timezone",
+        "operationId": "UserService_UpdateTimezone",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateTimezoneResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateTimezoneRequest"
+            }
+          }
+        ],
+        "tags": [
+          "UserService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1GetMeResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/v1User"
+        }
+      }
+    },
+    "v1GetPreferencesResponse": {
+      "type": "object",
+      "properties": {
+        "preferences": {
+          "$ref": "#/definitions/v1Preferences"
+        }
+      }
+    },
+    "v1Preferences": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "defaultPrivacyLevel": {
+          "$ref": "#/definitions/v1PrivacyLevel"
+        },
+        "showOnlineStatus": {
+          "type": "boolean"
+        },
+        "showLastSeen": {
+          "type": "boolean"
+        },
+        "showReadReceipts": {
+          "type": "boolean"
+        },
+        "allowContactDiscovery": {
+          "type": "boolean"
+        },
+        "pushNotifications": {
+          "type": "boolean"
+        },
+        "emailNotifications": {
+          "type": "boolean"
+        },
+        "quietHoursEnabled": {
+          "type": "boolean"
+        },
+        "quietHoursStart": {
+          "type": "string",
+          "title": "HH:MM format"
+        },
+        "quietHoursEnd": {
+          "type": "string",
+          "title": "HH:MM format"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "Preferences represents user preferences"
+    },
+    "v1PrivacyLevel": {
+      "type": "string",
+      "enum": [
+        "PRIVACY_LEVEL_UNSPECIFIED",
+        "PRIVACY_LEVEL_BASIC",
+        "PRIVACY_LEVEL_STATUS",
+        "PRIVACY_LEVEL_ACTIVITY",
+        "PRIVACY_LEVEL_LOCATION"
+      ],
+      "default": "PRIVACY_LEVEL_UNSPECIFIED",
+      "description": "- PRIVACY_LEVEL_BASIC: Online/offline, timezone\n - PRIVACY_LEVEL_STATUS: At home, At work, Commuting, Sleeping\n - PRIVACY_LEVEL_ACTIVITY: Current activity, estimated free time\n - PRIVACY_LEVEL_LOCATION: Real-time location sharing",
+      "title": "Privacy level enum used across user and circle domains"
+    },
+    "v1UpdatePreferencesRequest": {
+      "type": "object",
+      "properties": {
+        "defaultPrivacyLevel": {
+          "$ref": "#/definitions/v1PrivacyLevel"
+        },
+        "showOnlineStatus": {
+          "type": "boolean"
+        },
+        "showLastSeen": {
+          "type": "boolean"
+        },
+        "showReadReceipts": {
+          "type": "boolean"
+        },
+        "allowContactDiscovery": {
+          "type": "boolean"
+        },
+        "pushNotifications": {
+          "type": "boolean"
+        },
+        "emailNotifications": {
+          "type": "boolean"
+        },
+        "quietHoursEnabled": {
+          "type": "boolean"
+        },
+        "quietHoursStart": {
+          "type": "string"
+        },
+        "quietHoursEnd": {
+          "type": "string"
+        }
+      },
+      "title": "UpdatePreferences messages"
+    },
+    "v1UpdatePreferencesResponse": {
+      "type": "object",
+      "properties": {
+        "preferences": {
+          "$ref": "#/definitions/v1Preferences"
+        }
+      }
+    },
+    "v1UpdateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "displayName": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateProfile messages"
+    },
+    "v1UpdateProfileResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/v1User"
+        }
+      }
+    },
+    "v1UpdateTimezoneRequest": {
+      "type": "object",
+      "properties": {
+        "timezone": {
+          "type": "string"
+        }
+      },
+      "title": "UpdateTimezone messages"
+    },
+    "v1UpdateTimezoneResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/definitions/v1User"
+        }
+      }
+    },
+    "v1User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "auth0Sub": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "timezone": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "title": "User represents a user in the system"
+    }
+  }
+}
