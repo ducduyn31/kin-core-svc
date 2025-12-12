@@ -1,0 +1,28 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/danielng/kin-core-svc/gen/proto
+  disable:
+    - file_option: go_package_prefix
+      module: buf.build/googleapis/googleapis
+plugins:
+  - remote: buf.build/protocolbuffers/go
+    out: gen/proto
+    opt:
+      - paths=source_relative
+
+  - remote: buf.build/grpc/go
+    out: gen/proto
+    opt:
+      - paths=source_relative
+
+  - remote: buf.build/grpc-ecosystem/gateway
+    out: gen/proto
+    opt:
+      - paths=source_relative
+      - generate_unbound_methods=true
+
+  - remote: buf.build/grpc-ecosystem/openapiv2
+    out: gen/openapi

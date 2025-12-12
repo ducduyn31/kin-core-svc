@@ -156,6 +156,38 @@ tasks:
       - echo "Migration status..."
       - pgroll status
 
+  ## Code Generation
+
+  generate:
+    desc: Generate all code (protobuf, gRPC, Bob models)
+    cmds:
+      - task: proto:generate
+      - task: bob:generate
+
+  proto:generate:
+    desc: Generate protobuf and gRPC code
+    cmds:
+      - echo "Generating protobuf and gRPC code..."
+      - buf generate
+
+  proto:lint:
+    desc: Lint proto files
+    cmds:
+      - echo "Linting proto files..."
+      - buf lint
+
+  proto:breaking:
+    desc: Check for breaking changes in proto files
+    cmds:
+      - echo "Checking for breaking changes..."
+      - buf breaking --against '.git#branch=main'
+
+  proto:format:
+    desc: Format proto files
+    cmds:
+      - echo "Formatting proto files..."
+      - buf format -w
+
   ## Bob Code Generation
 
   bob:generate:

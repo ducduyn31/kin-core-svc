@@ -1,0 +1,287 @@
+syntax = "proto3";
+
+package kin.v1;
+
+option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "kin/v1/common.proto";
+
+service CircleService {
+  rpc CreateCircle(CreateCircleRequest) returns (CreateCircleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/circles"
+      body: "*"
+    };
+  }
+
+  rpc ListCircles(ListCirclesRequest) returns (ListCirclesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/circles"
+    };
+  }
+
+  rpc GetCircle(GetCircleRequest) returns (GetCircleResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/circles/{circle_id}"
+    };
+  }
+
+  rpc UpdateCircle(UpdateCircleRequest) returns (UpdateCircleResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/circles/{circle_id}"
+      body: "*"
+    };
+  }
+
+  rpc DeleteCircle(DeleteCircleRequest) returns (DeleteCircleResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/circles/{circle_id}"
+    };
+  }
+
+  rpc LeaveCircle(LeaveCircleRequest) returns (LeaveCircleResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/circles/{circle_id}/leave"
+    };
+  }
+
+  rpc ListMembers(ListMembersRequest) returns (ListMembersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/circles/{circle_id}/members"
+    };
+  }
+
+  rpc AddMember(AddMemberRequest) returns (AddMemberResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/circles/{circle_id}/members"
+      body: "*"
+    };
+  }
+
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/circles/{circle_id}/members/{member_id}"
+    };
+  }
+
+  rpc GetSharingPreference(GetSharingPreferenceRequest) returns (GetSharingPreferenceResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/circles/{circle_id}/sharing"
+    };
+  }
+
+  rpc UpdateSharingPreference(UpdateSharingPreferenceRequest) returns (UpdateSharingPreferenceResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/circles/{circle_id}/sharing"
+      body: "*"
+    };
+  }
+
+  rpc CreateInvitation(CreateInvitationRequest) returns (CreateInvitationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/circles/{circle_id}/invitations"
+      body: "*"
+    };
+  }
+
+  rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/circles/join"
+    };
+  }
+}
+
+enum MemberRole {
+  MEMBER_ROLE_UNSPECIFIED = 0;
+  MEMBER_ROLE_ADMIN = 1;
+  MEMBER_ROLE_MEMBER = 2;
+}
+
+enum InvitationType {
+  INVITATION_TYPE_UNSPECIFIED = 0;
+  INVITATION_TYPE_DIRECT = 1;
+  INVITATION_TYPE_LINK = 2;
+}
+
+enum InvitationStatus {
+  INVITATION_STATUS_UNSPECIFIED = 0;
+  INVITATION_STATUS_PENDING = 1;
+  INVITATION_STATUS_ACCEPTED = 2;
+  INVITATION_STATUS_EXPIRED = 3;
+  INVITATION_STATUS_REVOKED = 4;
+}
+
+enum LocationPrecision {
+  LOCATION_PRECISION_UNSPECIFIED = 0;
+  LOCATION_PRECISION_COUNTRY = 1;
+  LOCATION_PRECISION_CITY = 2;
+  LOCATION_PRECISION_NEIGHBORHOOD = 3;
+  LOCATION_PRECISION_EXACT = 4;
+}
+
+message Circle {
+  string id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional string avatar = 4;
+  string created_by = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message Member {
+  string id = 1;
+  string circle_id = 2;
+  string user_id = 3;
+  MemberRole role = 4;
+  optional string nickname = 5;
+  google.protobuf.Timestamp joined_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message Invitation {
+  string id = 1;
+  string circle_id = 2;
+  string inviter_id = 3;
+  optional string invitee_id = 4;
+  InvitationType type = 5;
+  string code = 6;
+  InvitationStatus status = 7;
+  optional int32 max_uses = 8;
+  int32 use_count = 9;
+  optional google.protobuf.Timestamp expires_at = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}
+
+message SharingPreference {
+  string id = 1;
+  string circle_id = 2;
+  string user_id = 3;
+  PrivacyLevel privacy_level = 4;
+  bool share_timezone = 5;
+  bool share_availability = 6;
+  bool share_location = 7;
+  LocationPrecision location_precision = 8;
+  bool share_activity = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message CreateCircleRequest {
+  string name = 1;
+  optional string description = 2;
+}
+
+message CreateCircleResponse {
+  Circle circle = 1;
+}
+
+message ListCirclesRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+}
+
+message ListCirclesResponse {
+  repeated Circle circles = 1;
+  PaginationMeta meta = 2;
+}
+
+message GetCircleRequest {
+  string circle_id = 1;
+}
+
+message GetCircleResponse {
+  Circle circle = 1;
+}
+
+message UpdateCircleRequest {
+  string circle_id = 1;
+  optional string name = 2;
+  optional string description = 3;
+}
+
+message UpdateCircleResponse {
+  Circle circle = 1;
+}
+
+message DeleteCircleRequest {
+  string circle_id = 1;
+}
+
+message DeleteCircleResponse {}
+
+message LeaveCircleRequest {
+  string circle_id = 1;
+}
+
+message LeaveCircleResponse {}
+
+message ListMembersRequest {
+  string circle_id = 1;
+}
+
+message ListMembersResponse {
+  repeated Member members = 1;
+}
+
+message AddMemberRequest {
+  string circle_id = 1;
+  string user_id = 2;
+  MemberRole role = 3;
+}
+
+message AddMemberResponse {
+  Member member = 1;
+}
+
+message RemoveMemberRequest {
+  string circle_id = 1;
+  string member_id = 2;
+}
+
+message RemoveMemberResponse {}
+
+message GetSharingPreferenceRequest {
+  string circle_id = 1;
+}
+
+message GetSharingPreferenceResponse {
+  SharingPreference sharing_preference = 1;
+}
+
+message UpdateSharingPreferenceRequest {
+  string circle_id = 1;
+  optional PrivacyLevel privacy_level = 2;
+  optional bool share_timezone = 3;
+  optional bool share_availability = 4;
+  optional bool share_location = 5;
+  optional LocationPrecision location_precision = 6;
+  optional bool share_activity = 7;
+}
+
+message UpdateSharingPreferenceResponse {
+  SharingPreference sharing_preference = 1;
+}
+
+message CreateInvitationRequest {
+  string circle_id = 1;
+  InvitationType type = 2;
+  optional string invitee_id = 3;
+  optional int32 max_uses = 4;
+  optional int32 expires_in_hours = 5;
+}
+
+message CreateInvitationResponse {
+  Invitation invitation = 1;
+}
+
+message AcceptInvitationRequest {
+  string code = 1;
+}
+
+message AcceptInvitationResponse {
+  Circle circle = 1;
+}

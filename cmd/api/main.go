@@ -17,8 +17,7 @@ import (
 	"github.com/danielng/kin-core-svc/internal/infrastructure/postgres"
 	"github.com/danielng/kin-core-svc/internal/infrastructure/redis"
 	"github.com/danielng/kin-core-svc/internal/infrastructure/telemetry"
-	httpRouter "github.com/danielng/kin-core-svc/internal/interfaces/http"
-	"github.com/gin-gonic/gin"
+	grpcServer "github.com/danielng/kin-core-svc/internal/interfaces/grpc"
 )
 
 var (
@@ -40,8 +39,8 @@ func main() {
 		"version", Version,
 		"git_commit", GitCommit,
 		"build_time", BuildTime,
-		"host", cfg.Server.Host,
-		"port", cfg.Server.Port,
+		"grpc_port", cfg.GRPC.Port,
+		"gateway_port", cfg.GRPC.GatewayPort,
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -94,37 +93,48 @@ func main() {
 	userService := user.NewService(userRepo, logger)
 	circleService := circle.NewService(circleRepo, logger)
 
-	if os.Getenv("KIN_ENV") == "production" {
-		gin.SetMode(gin.ReleaseMode)
-	}
+	grpc := grpcServer.NewServer(grpcServer.ServerConfig{
+		Logger:           logger,
+		Auth0Validator:   auth0Validator,
+		UserService:      userService,
+		CircleService:    circleService,
+		EnableReflection: cfg.GRPC.EnableReflection,
+	})
 
-	router := httpRouter.NewRouter(httpRouter.RouterConfig{
-		Logger:         logger,
-		Auth0Validator: auth0Validator,
-		UserService:    userService,
-		CircleService:  circleService,
-		ServiceName:    cfg.Telemetry.ServiceName,
-		BuildInfo: httpRouter.BuildInfo{
+	go func() {
+		if err := grpc.Serve(cfg.GRPC.Address()); err != nil {
+			logger.Error("gRPC server error", "error", err)
+			os.Exit(1)
+		}
+	}()
+
+	gatewayCtx := context.Background()
+	gateway, err := grpcServer.NewGatewayServer(gatewayCtx, grpcServer.GatewayConfig{
+		GRPCAddress: cfg.GRPC.Address(),
+		Logger:      logger,
+		BuildInfo: grpcServer.BuildInfo{
 			Version:   Version,
 			GitCommit: GitCommit,
 			BuildTime: BuildTime,
 		},
-		TelemetryEnable: cfg.Telemetry.Enabled,
-		HealthCheckers:  []httpRouter.HealthChecker{db, redisClient},
+		HealthCheckers: []grpcServer.HealthChecker{db, redisClient},
 	})
+	if err != nil {
+		logger.Error("failed to create gRPC gateway", "error", err)
+		os.Exit(1)
+	}
 
-	server := &http.Server{
-		Addr:         cfg.Server.Address(),
-		Handler:      router,
+	gatewayServer := &http.Server{
+		Addr:         cfg.GRPC.GatewayAddress(),
+		Handler:      gateway.Handler(),
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 	}
 
 	go func() {
-		logger.Info("HTTP server listening", "address", cfg.Server.Address())
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Error("server error", "error", err)
-			os.Exit(1)
+		logger.Info("gRPC-Gateway listening", "address", cfg.GRPC.GatewayAddress())
+		if err := gatewayServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Error("gRPC-Gateway error", "error", err)
 		}
 	}()
 
@@ -132,17 +142,18 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logger.Info("shutting down server...")
+	logger.Info("shutting down servers...")
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
 	defer shutdownCancel()
 
-	if err := server.Shutdown(shutdownCtx); err != nil {
-		logger.Error("server forced to shutdown", "error", err)
-		os.Exit(1)
+	if err := gatewayServer.Shutdown(shutdownCtx); err != nil {
+		logger.Error("gRPC-Gateway forced to shutdown", "error", err)
 	}
 
-	logger.Info("server stopped")
+	grpc.GracefulStop()
+
+	logger.Info("servers stopped")
 }
 
 func setupLogger(cfg config.LoggingConfig) *slog.Logger {

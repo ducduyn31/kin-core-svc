@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+package kin.v1;
+
+option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "kin/v1/common.proto";
+
+service UserService {
+  rpc GetMe(GetMeRequest) returns (GetMeResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/me"
+    };
+  }
+
+  rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/me"
+      body: "*"
+    };
+  }
+
+  rpc UpdateTimezone(UpdateTimezoneRequest) returns (UpdateTimezoneResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/me/timezone"
+      body: "*"
+    };
+  }
+
+  rpc GetPreferences(GetPreferencesRequest) returns (GetPreferencesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/users/me/preferences"
+    };
+  }
+
+  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/users/me/preferences"
+      body: "*"
+    };
+  }
+}
+
+message User {
+  string id = 1;
+  string auth0_sub = 2;
+  string display_name = 3;
+  optional string avatar = 4;
+  optional string bio = 5;
+  optional string phone_number = 6;
+  string timezone = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message Preferences {
+  string user_id = 1;
+  PrivacyLevel default_privacy_level = 2;
+  bool show_online_status = 3;
+  bool show_last_seen = 4;
+  bool show_read_receipts = 5;
+  bool allow_contact_discovery = 6;
+  bool push_notifications = 7;
+  bool email_notifications = 8;
+  bool quiet_hours_enabled = 9;
+  optional string quiet_hours_start = 10;
+  optional string quiet_hours_end = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+}
+
+message GetMeRequest {}
+
+message GetMeResponse {
+  User user = 1;
+}
+
+message UpdateProfileRequest {
+  optional string display_name = 1;
+  optional string bio = 2;
+  optional string avatar = 3;
+}
+
+message UpdateProfileResponse {
+  User user = 1;
+}
+
+message UpdateTimezoneRequest {
+  string timezone = 1;
+}
+
+message UpdateTimezoneResponse {
+  User user = 1;
+}
+
+message GetPreferencesRequest {}
+
+message GetPreferencesResponse {
+  Preferences preferences = 1;
+}
+
+message UpdatePreferencesRequest {
+  optional PrivacyLevel default_privacy_level = 1;
+  optional bool show_online_status = 2;
+  optional bool show_last_seen = 3;
+  optional bool show_read_receipts = 4;
+  optional bool allow_contact_discovery = 5;
+  optional bool push_notifications = 6;
+  optional bool email_notifications = 7;
+  optional bool quiet_hours_enabled = 8;
+  optional string quiet_hours_start = 9;
+  optional string quiet_hours_end = 10;
+}
+
+message UpdatePreferencesResponse {
+  Preferences preferences = 1;
+}

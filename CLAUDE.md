@@ -5,7 +5,7 @@
 | Layer | Technology |
 |-------|------------|
 | Language | Go 1.23+ |
-| HTTP Framework | Gin |
+| API | gRPC + gRPC-Gateway (REST) |
 | Configuration | Viper (YAML + environment variables) |
 | Database | PostgreSQL with pgx/v5 |
 | SQL Builder | Bob (github.com/stephenafamo/bob) |
@@ -14,7 +14,7 @@
 | Cache/Presence | Redis (go-redis/v9) |
 | Object Storage | S3-compatible |
 | Logging | slog (stdlib) |
-| Validation | go-playground/validator/v10 |
+| Proto Generation | buf (buf.build) |
 
 ## Architecture
 
@@ -28,7 +28,7 @@ interfaces → application → domain ← infrastructure
 - **Domain**: Core business logic, no external dependencies
 - **Application**: Use cases, orchestrates domain objects
 - **Infrastructure**: External implementations (database, cache, auth)
-- **Interfaces**: Entry points (HTTP handlers)
+- **Interfaces**: Entry points (gRPC handlers)
 
 ### Dependency Rule
 
@@ -76,11 +76,17 @@ task migrate:rollback
 task migrate:status
 ```
 
-### Bob Code Generation
+### Code Generation
 
-After migrations, regenerate Bob models:
+Generate all code (protobuf, gRPC, Bob models):
 ```bash
-task bob:generate
+task generate
+```
+
+Or run individually:
+```bash
+task proto:generate  # Generate protobuf and gRPC code
+task bob:generate    # Generate Bob database models
 ```
 
 ### Bob Usage
@@ -116,16 +122,16 @@ Auth0 handles authentication. The backend:
 2. Extracts `sub` claim to identify user
 3. Creates/retrieves local user record linked by `auth0_sub`
 
-### Auth Middleware Flow
+### Auth Flow (gRPC)
 ```
-Request → Extract JWT → Validate with Auth0 JWKS → Get/Create User → Set in Context
+Request → Extract JWT from metadata → Validate with Auth0 JWKS → Get/Create User → Set in Context
 ```
 
-### Getting Current User
+### Getting Current User (gRPC handlers)
 ```go
-func (h *Handler) SomeEndpoint(c *gin.Context) {
-    user := c.MustGet(ctxkey.User).(*domain.User)
-    userID := c.MustGet(ctxkey.UserID).(uuid.UUID)
+func (h *Handler) SomeMethod(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+    user := ctx.Value(interceptors.UserKey).(*domain.User)
+    userID := ctx.Value(interceptors.UserIDKey).(uuid.UUID)
 }
 ```
 
@@ -149,8 +155,8 @@ task test
 # Run linter
 task lint
 
-# Generate Bob models
-task bob:generate
+# Generate all code (proto, gRPC, Bob)
+task generate
 
 # Start all migrations
 task migrate:up
@@ -169,13 +175,13 @@ task build
 
 - Define domain errors in each domain's `errors.go`
 - Wrap infrastructure errors with context
-- Use `pkg/apperror` for HTTP error responses
+- Use `pkg/apperror` for application errors (mapped to gRPC status codes)
 
 ### Naming
 
 - Use singular for domain packages: `user`, `circle`, `message`
 - Use `_repo.go` suffix for repository implementations
-- Use `_handler.go` suffix for HTTP handlers
+- Use `_handler.go` suffix for gRPC handlers
 
 ### Testing
 
@@ -183,34 +189,93 @@ task build
 - Integration tests in `_test` package
 - Use testcontainers for database tests
 
-## API Conventions
+## API
 
-### Response Format
-```json
-{
-  "data": {},
-  "meta": {
-    "page": 1,
-    "per_page": 20,
-    "total": 100
-  }
-}
+The service exposes both gRPC and REST APIs:
+- **gRPC**: Native protocol buffer communication on port 50051
+- **REST**: gRPC-Gateway reverse proxy on port 8080
+
+### Ports
+
+| Service | Port | Purpose |
+|---------|------|---------|
+| gRPC | 50051 | Native gRPC API |
+| REST | 8080 | gRPC-Gateway (HTTP/JSON) |
+
+### Health Endpoints (REST)
+
+```bash
+# Health check (checks DB, Redis)
+curl http://localhost:8080/health
+
+# Readiness check (version info)
+curl http://localhost:8080/ready
 ```
 
-### Error Format
-```json
-{
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input",
-    "details": []
-  }
-}
+### Configuration
+
+```yaml
+grpc:
+  port: 50051
+  enable_reflection: true    # For grpcurl debugging
+  gateway_port: 8080
 ```
 
-### Pagination
+Environment variables:
+- `GRPC_PORT` - gRPC server port (default: 50051)
+- `GRPC_ENABLE_REFLECTION` - Enable reflection service for debugging
+- `GRPC_GATEWAY_PORT` - REST gateway port (default: 8080)
 
-Use cursor-based pagination for lists:
+### Services
+
+- `UserService` - User profile and preferences
+- `CircleService` - Circle management, members, invitations
+
+### Testing with grpcurl
+
+```bash
+# List services (requires reflection)
+grpcurl -plaintext localhost:50051 list
+
+# Call GetMe (with auth token)
+grpcurl -plaintext \
+  -H "Authorization: Bearer <token>" \
+  localhost:50051 kin.v1.UserService/GetMe
+
+# Create circle
+grpcurl -plaintext \
+  -H "Authorization: Bearer <token>" \
+  -d '{"name": "Family", "description": "My family circle"}' \
+  localhost:50051 kin.v1.CircleService/CreateCircle
 ```
-GET /circles/{id}/messages?cursor=xxx&limit=50
+
+### REST API (via gRPC-Gateway)
+
+The gateway exposes REST endpoints that proxy to gRPC:
+
+```bash
+# Get current user
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:8080/api/v1/users/me
+
+# Create circle
+curl -X POST -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Family", "description": "My family circle"}' \
+  http://localhost:8080/api/v1/circles
 ```
+
+### Proto Files
+
+Location: `proto/kin/v1/`
+
+Generate code:
+```bash
+task proto:generate
+```
+
+Generated files:
+- `gen/proto/kin/v1/*.pb.go` - Protobuf messages
+- `gen/proto/kin/v1/*_grpc.pb.go` - gRPC service interfaces
+- `gen/proto/kin/v1/*.pb.gw.go` - gRPC-Gateway handlers
+- `gen/openapi/kin/v1/*.swagger.json` - OpenAPI specs
