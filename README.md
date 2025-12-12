@@ -24,6 +24,7 @@ Kin helps you know when your people are available. Share as much or as little as
 
 - Docker and Docker Compose
 - Go 1.23+ (for local development)
+- [buf](https://buf.build/) (for proto generation)
 - Auth0 account
 
 ### Quick Start
@@ -45,12 +46,17 @@ cp .env.example .env
 task docker:up
 ```
 
-4. Run database migrations
+4. Generate code (protobuf, gRPC, Bob models)
+```bash
+task generate
+```
+
+5. Run database migrations
 ```bash
 task migrate:up
 ```
 
-5. Run the application
+6. Run the application
 ```bash
 task run
 ```
@@ -61,7 +67,8 @@ See `.env.example` for required environment variables.
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string |
+| `DATABASE_WRITE_URL` | PostgreSQL write connection string |
+| `DATABASE_READ_URL` | PostgreSQL read connection string |
 | `REDIS_URL` | Redis connection string |
 | `AUTH0_DOMAIN` | Auth0 tenant domain |
 | `AUTH0_AUDIENCE` | Auth0 API audience |
@@ -69,6 +76,8 @@ See `.env.example` for required environment variables.
 | `S3_ACCESS_KEY` | S3 access key |
 | `S3_SECRET_KEY` | S3 secret key |
 | `S3_BUCKET` | S3 bucket name |
+| `GRPC_PORT` | gRPC server port (default: 50051) |
+| `GRPC_GATEWAY_PORT` | REST gateway port (default: 8080) |
 
 ## Development
 
@@ -79,10 +88,12 @@ task build           # Build the application
 task run             # Run the application
 task test            # Run tests
 task lint            # Run linter
+task generate        # Generate all code (proto + Bob)
+task proto:generate  # Generate protobuf/gRPC code
+task bob:generate    # Generate Bob ORM models
 task docker:up       # Start Docker containers
 task docker:down     # Stop Docker containers
 task migrate:up      # Run all migrations
-task bob:generate    # Generate Bob ORM models
 ```
 
 ### Project Structure
@@ -90,19 +101,76 @@ task bob:generate    # Generate Bob ORM models
 ```
 kin/
 ├── cmd/api/              # Application entry point
+├── proto/                # Protocol buffer definitions
+│   └── kin/v1/           # API version 1 protos
+├── gen/                  # Generated code (gitignored)
+│   ├── proto/            # Generated protobuf/gRPC code
+│   └── openapi/          # Generated OpenAPI specs
 ├── internal/
 │   ├── config/           # Configuration management
 │   ├── domain/           # Business logic (DDD aggregates)
 │   ├── application/      # Use cases and services
 │   ├── infrastructure/   # External implementations
-│   └── interfaces/       # HTTP handlers
+│   └── interfaces/grpc/  # gRPC handlers and gateway
 ├── pkg/                  # Shared utilities
 └── config/               # Configuration files
 ```
 
-## API Documentation
+## API
 
-API documentation is available at `/swagger` when running in development mode.
+The service exposes both gRPC and REST APIs:
+
+| Service | Port | Description |
+|---------|------|-------------|
+| gRPC | 50051 | Native gRPC API |
+| REST | 8080 | gRPC-Gateway (HTTP/JSON) |
+
+### Health Endpoints
+
+```bash
+# Health check (checks DB, Redis)
+curl http://localhost:8080/health
+
+# Readiness check (version info)
+curl http://localhost:8080/ready
+```
+
+### gRPC (with grpcurl)
+
+```bash
+# List services (requires reflection enabled)
+grpcurl -plaintext localhost:50051 list
+
+# Get current user
+grpcurl -plaintext \
+  -H "Authorization: Bearer <token>" \
+  localhost:50051 kin.v1.UserService/GetMe
+
+# Create circle
+grpcurl -plaintext \
+  -H "Authorization: Bearer <token>" \
+  -d '{"name": "Family"}' \
+  localhost:50051 kin.v1.CircleService/CreateCircle
+```
+
+### REST (via gRPC-Gateway)
+
+```bash
+# Get current user
+curl -H "Authorization: Bearer <token>" \
+  http://localhost:8080/api/v1/users/me
+
+# Create circle
+curl -X POST \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Family"}' \
+  http://localhost:8080/api/v1/circles
+```
+
+### OpenAPI
+
+Generated OpenAPI specs are available in `gen/openapi/` after running `task generate`.
 
 ## License
 
