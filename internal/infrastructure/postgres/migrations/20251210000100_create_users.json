@@ -1,5 +1,4 @@
 {
-  "name": "20251210000100_create_users",
   "operations": [
     {
       "create_table": {
@@ -61,14 +60,14 @@
       "create_index": {
         "name": "idx_users_auth0_sub",
         "table": "users",
-        "columns": ["auth0_sub"]
+        "columns": {"auth0_sub": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_users_phone_number",
         "table": "users",
-        "columns": ["phone_number"]
+        "columns": {"phone_number": {}}
       }
     },
     {
@@ -80,6 +79,7 @@
             "type": "uuid",
             "pk": true,
             "references": {
+              "name": "fk_user_preferences_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"

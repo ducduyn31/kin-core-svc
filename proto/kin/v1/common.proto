@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package kin.v1;
+
+option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
+
+message Empty {}
+
+message PaginationRequest {
+  int32 page = 1;
+  int32 per_page = 2;
+  string cursor = 3;
+}
+
+message PaginationMeta {
+  int32 page = 1;
+  int32 per_page = 2;
+  int64 total = 3;
+  string next_cursor = 4;
+}
+
+enum PrivacyLevel {
+  PRIVACY_LEVEL_UNSPECIFIED = 0;
+  PRIVACY_LEVEL_BASIC = 1;
+  PRIVACY_LEVEL_STATUS = 2;
+  PRIVACY_LEVEL_ACTIVITY = 3;
+  PRIVACY_LEVEL_LOCATION = 4;
+}

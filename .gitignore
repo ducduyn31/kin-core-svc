@@ -43,8 +43,14 @@ logs/
 tmp/
 temp/
 
+# Nix
+result
+result-*
+.direnv/
+.nix-go/
+
 # Build artifacts
 dist/
 
-# Generated files
+# Generated files (Bob models)
 internal/infrastructure/postgres/models/

@@ -1,5 +1,4 @@
 {
-  "name": "20251210000200_create_circles",
   "operations": [
     {
       "create_table": {
@@ -30,6 +29,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circles_created_by",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -54,7 +54,7 @@
       "create_index": {
         "name": "idx_circles_created_by",
         "table": "circles",
-        "columns": ["created_by"]
+        "columns": {"created_by": {}}
       }
     },
     {
@@ -71,6 +71,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_members_circle_id",
               "table": "circles",
               "column": "id",
               "on_delete": "CASCADE"
@@ -81,6 +82,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_members_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -116,7 +118,7 @@
       "create_index": {
         "name": "idx_circle_members_circle_user",
         "table": "circle_members",
-        "columns": ["circle_id", "user_id"],
+        "columns": {"circle_id": {}, "user_id": {}},
         "unique": true
       }
     },
@@ -124,7 +126,7 @@
       "create_index": {
         "name": "idx_circle_members_user",
         "table": "circle_members",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     },
     {
@@ -141,6 +143,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_sharing_preferences_circle_id",
               "table": "circles",
               "column": "id",
               "on_delete": "CASCADE"
@@ -151,6 +154,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_sharing_preferences_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -211,7 +215,7 @@
       "create_index": {
         "name": "idx_circle_sharing_circle_user",
         "table": "circle_sharing_preferences",
-        "columns": ["circle_id", "user_id"],
+        "columns": {"circle_id": {}, "user_id": {}},
         "unique": true
       }
     },
@@ -229,6 +233,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_invitations_circle_id",
               "table": "circles",
               "column": "id",
               "on_delete": "CASCADE"
@@ -239,6 +244,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_circle_invitations_inviter_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -249,6 +255,7 @@
             "type": "uuid",
             "nullable": true,
             "references": {
+              "name": "fk_circle_invitations_invitee_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -306,14 +313,14 @@
       "create_index": {
         "name": "idx_circle_invitations_code",
         "table": "circle_invitations",
-        "columns": ["code"]
+        "columns": {"code": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_circle_invitations_invitee",
         "table": "circle_invitations",
-        "columns": ["invitee_id"]
+        "columns": {"invitee_id": {}}
       }
     }
   ]

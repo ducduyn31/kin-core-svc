@@ -1,5 +1,4 @@
 {
-  "name": "20251210000400_create_messages",
   "operations": [
     {
       "create_table": {
@@ -15,6 +14,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_messages_conversation_id",
               "table": "conversations",
               "column": "id",
               "on_delete": "CASCADE"
@@ -25,6 +25,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_messages_sender_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -58,12 +59,7 @@
           {
             "name": "reply_to_id",
             "type": "uuid",
-            "nullable": true,
-            "references": {
-              "table": "messages",
-              "column": "id",
-              "on_delete": "SET NULL"
-            }
+            "nullable": true
           },
           {
             "name": "is_edited",
@@ -95,14 +91,14 @@
       "create_index": {
         "name": "idx_messages_conversation_created",
         "table": "messages",
-        "columns": ["conversation_id", "created_at"]
+        "columns": {"conversation_id": {}, "created_at": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_messages_sender",
         "table": "messages",
-        "columns": ["sender_id"]
+        "columns": {"sender_id": {}}
       }
     },
     {
@@ -119,6 +115,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_receipts_message_id",
               "table": "messages",
               "column": "id",
               "on_delete": "CASCADE"
@@ -129,6 +126,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_receipts_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -169,7 +167,7 @@
       "create_index": {
         "name": "idx_receipts_message_user",
         "table": "message_receipts",
-        "columns": ["message_id", "user_id"],
+        "columns": {"message_id": {}, "user_id": {}},
         "unique": true
       }
     },
@@ -187,6 +185,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_reactions_message_id",
               "table": "messages",
               "column": "id",
               "on_delete": "CASCADE"
@@ -197,6 +196,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_reactions_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -220,7 +220,7 @@
       "create_index": {
         "name": "idx_reactions_message_user_emoji",
         "table": "message_reactions",
-        "columns": ["message_id", "user_id", "emoji"],
+        "columns": {"message_id": {}, "user_id": {}, "emoji": {}},
         "unique": true
       }
     },
@@ -238,6 +238,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_deletions_message_id",
               "table": "messages",
               "column": "id",
               "on_delete": "CASCADE"
@@ -248,6 +249,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_message_deletions_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -266,7 +268,7 @@
       "create_index": {
         "name": "idx_deletions_message_user",
         "table": "message_deletions",
-        "columns": ["message_id", "user_id"],
+        "columns": {"message_id": {}, "user_id": {}},
         "unique": true
       }
     }

@@ -1,12 +1,12 @@
 psql:
-  dsn: ${DATABASE_URL}
+  dsn: $PSQL_DSN
   output: internal/infrastructure/postgres/models
   pkgname: models
   no_factory: false
   no_tests: true
   concurrency: 5
   except:
-    - pgroll.migrations
+    pgroll.migrations: []
   add_enum_types: true
   enum:
     package: enums

@@ -1,19 +1,17 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:18-alpine
     container_name: kin-postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-kin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kin_password}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-kin}
+      POSTGRES_HOST_AUTH_METHOD: "trust"
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kin} -d ${POSTGRES_DB:-kin}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-kin}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -85,7 +83,7 @@ services:
     container_name: kin-api
     environment:
       KIN_ENV: development
-      DATABASE_URL: postgres://${POSTGRES_USER:-kin}:${POSTGRES_PASSWORD:-kin_password}@postgres:5432/${POSTGRES_DB:-kin}?sslmode=disable
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}@postgres:5432/${POSTGRES_DB:-kin}?sslmode=disable
       REDIS_URL: redis://redis:6379
       S3_ENDPOINT: http://minio:9000
       S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
