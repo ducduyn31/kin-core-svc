@@ -138,9 +138,20 @@ func (h *Handler) SomeMethod(ctx context.Context, req *pb.Request) (*pb.Response
 ## Configuration
 
 Viper loads config from:
-1. `config/config.yaml` (base)
-2. `config/config.{env}.yaml` (environment override)
+1. `config/config.yaml` (base, committed)
+2. `config/config.{env}.yaml` (environment override, gitignored for local dev)
 3. Environment variables (highest priority)
+
+### Local Development Config
+
+```bash
+# Initialize local config from template
+task config:init
+# Or manually:
+cp config/config.development.yaml.example config/config.development.yaml
+```
+
+The `config.development.yaml` file is gitignored - each developer can customize without affecting others.
 
 Environment variables use underscore notation: `DATABASE_URL`, `AUTH0_DOMAIN`
 

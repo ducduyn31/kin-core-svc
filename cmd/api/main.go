@@ -46,22 +46,6 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	db, err := postgres.NewDB(ctx, cfg.Database)
-	if err != nil {
-		logger.Error("failed to connect to database", "error", err)
-		os.Exit(1)
-	}
-	defer db.Close()
-	logger.Info("connected to PostgreSQL")
-
-	redisClient, err := redis.NewClient(ctx, cfg.Redis)
-	if err != nil {
-		logger.Error("failed to connect to Redis", "error", err)
-		os.Exit(1)
-	}
-	defer func() { _ = redisClient.Close() }()
-	logger.Info("connected to Redis")
-
 	otel, err := telemetry.New(ctx, telemetry.Config{
 		ServiceName:    cfg.Telemetry.ServiceName,
 		ServiceVersion: Version,
@@ -84,6 +68,26 @@ func main() {
 		logger.Info("telemetry initialized", "endpoint", cfg.Telemetry.OTLPEndpoint)
 	}
 
+	db, err := postgres.NewDB(ctx, cfg.Database, postgres.DBOptions{
+		EnableTracing: otel.Enabled(),
+	})
+	if err != nil {
+		logger.Error("failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+	logger.Info("connected to PostgreSQL")
+
+	redisClient, err := redis.NewClient(ctx, cfg.Redis, redis.ClientOptions{
+		EnableTracing: otel.Enabled(),
+	})
+	if err != nil {
+		logger.Error("failed to connect to Redis", "error", err)
+		os.Exit(1)
+	}
+	defer func() { _ = redisClient.Close() }()
+	logger.Info("connected to Redis")
+
 	auth0Validator := auth.NewAuth0Validator(cfg.Auth.Domain, cfg.Auth.Audience)
 
 	userRepo := postgres.NewUserRepository(db)
@@ -99,6 +103,7 @@ func main() {
 		UserService:      userService,
 		CircleService:    circleService,
 		EnableReflection: cfg.GRPC.EnableReflection,
+		EnableTracing:    otel.Enabled(),
 	})
 
 	errCh := make(chan error, 2)

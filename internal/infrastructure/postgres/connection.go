@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/danielng/kin-core-svc/internal/config"
+	"github.com/exaring/otelpgx"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,15 +14,24 @@ type DB struct {
 	read  *pgxpool.Pool
 }
 
-func NewDB(ctx context.Context, cfg config.DatabaseConfig) (*DB, error) {
-	writePool, err := newPool(ctx, cfg.WriteURL, cfg)
+type DBOptions struct {
+	EnableTracing bool
+}
+
+func NewDB(ctx context.Context, cfg config.DatabaseConfig, opts ...DBOptions) (*DB, error) {
+	var opt DBOptions
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+
+	writePool, err := newPool(ctx, cfg.WriteURL, cfg, opt.EnableTracing)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create write pool: %w", err)
 	}
 
 	var readPool *pgxpool.Pool
 	if cfg.ReadURL != "" && cfg.ReadURL != cfg.WriteURL {
-		readPool, err = newPool(ctx, cfg.ReadURL, cfg)
+		readPool, err = newPool(ctx, cfg.ReadURL, cfg, opt.EnableTracing)
 		if err != nil {
 			writePool.Close()
 			return nil, fmt.Errorf("failed to create read pool: %w", err)
@@ -61,7 +71,7 @@ func (db *DB) Name() string {
 	return "postgres"
 }
 
-func newPool(ctx context.Context, url string, cfg config.DatabaseConfig) (*pgxpool.Pool, error) {
+func newPool(ctx context.Context, url string, cfg config.DatabaseConfig, enableTracing bool) (*pgxpool.Pool, error) {
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse database URL: %w", err)
@@ -71,6 +81,10 @@ func newPool(ctx context.Context, url string, cfg config.DatabaseConfig) (*pgxpo
 	poolConfig.MinConns = int32(cfg.MaxIdleConns)
 	poolConfig.MaxConnLifetime = cfg.ConnMaxLifetime
 	poolConfig.MaxConnIdleTime = cfg.ConnMaxIdleTime
+
+	if enableTracing {
+		poolConfig.ConnConfig.Tracer = otelpgx.NewTracer()
+	}
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {

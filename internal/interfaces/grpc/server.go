@@ -10,6 +10,7 @@ import (
 	"github.com/danielng/kin-core-svc/internal/infrastructure/auth"
 	"github.com/danielng/kin-core-svc/internal/interfaces/grpc/handlers"
 	"github.com/danielng/kin-core-svc/internal/interfaces/grpc/interceptors"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -20,6 +21,7 @@ type ServerConfig struct {
 	UserService      *user.Service
 	CircleService    *circle.Service
 	EnableReflection bool
+	EnableTracing    bool
 }
 
 type Server struct {
@@ -31,7 +33,15 @@ func NewServer(cfg ServerConfig) *Server {
 	recoveryInterceptor := interceptors.NewRecoveryInterceptor(cfg.Logger)
 	authInterceptor := interceptors.NewAuthInterceptor(cfg.Auth0Validator, cfg.UserService)
 
-	grpcServer := grpc.NewServer(
+	var opts []grpc.ServerOption
+
+	if cfg.EnableTracing {
+		opts = append(opts,
+			grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		)
+	}
+
+	opts = append(opts,
 		grpc.ChainUnaryInterceptor(
 			recoveryInterceptor.Unary(),
 			authInterceptor.Unary(),
@@ -41,6 +51,8 @@ func NewServer(cfg ServerConfig) *Server {
 			authInterceptor.Stream(),
 		),
 	)
+
+	grpcServer := grpc.NewServer(opts...)
 
 	userHandler := handlers.NewUserHandler(cfg.UserService)
 	circleHandler := handlers.NewCircleHandler(cfg.CircleService)

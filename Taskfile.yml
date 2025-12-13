@@ -24,8 +24,19 @@ tasks:
   ## Setup
 
   setup:
-    desc: Install development dependencies
+    desc: Install development dependencies and setup local config
     deps: [bob:install, deps]
+    cmds:
+      - task: config:init
+
+  config:init:
+    desc: Initialize local config from template
+    status:
+      - test -f config/config.development.yaml
+    cmds:
+      - echo "Creating local development config..."
+      - cp config/config.development.yaml.example config/config.development.yaml
+      - echo "Created config/config.development.yaml - customize as needed"
 
   ## Build
 
