@@ -1,0 +1,27 @@
+meta {
+  name: CreateCircle
+  type: grpc
+  seq: 1
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/CreateCircle
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "name": "Family",
+      "description": "My family circle"
+    }
+  '''
+}

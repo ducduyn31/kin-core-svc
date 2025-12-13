@@ -1,0 +1,27 @@
+meta {
+  name: ListCircles
+  type: grpc
+  seq: 2
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/ListCircles
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "limit": 10,
+      "offset": 0
+    }
+  '''
+}

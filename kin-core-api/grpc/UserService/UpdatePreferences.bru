@@ -1,0 +1,33 @@
+meta {
+  name: UpdatePreferences
+  type: grpc
+  seq: 5
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.UserService/UpdatePreferences
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "default_privacy_level": "PRIVACY_LEVEL_BASIC",
+      "show_online_status": true,
+      "show_last_seen": true,
+      "show_read_receipts": true,
+      "allow_contact_discovery": true,
+      "push_notifications": true,
+      "email_notifications": false,
+      "quiet_hours_enabled": false
+    }
+  '''
+}

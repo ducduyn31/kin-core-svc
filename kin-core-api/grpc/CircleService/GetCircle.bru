@@ -1,0 +1,26 @@
+meta {
+  name: GetCircle
+  type: grpc
+  seq: 3
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/GetCircle
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "circle_id": "your-circle-id-here"
+    }
+  '''
+}

@@ -279,3 +279,127 @@ Generated files:
 - `gen/proto/kin/v1/*_grpc.pb.go` - gRPC service interfaces
 - `gen/proto/kin/v1/*.pb.gw.go` - gRPC-Gateway handlers
 - `gen/openapi/kin/v1/*.swagger.json` - OpenAPI specs
+
+## Bruno API Collection
+
+The Bruno collection for testing both REST and gRPC endpoints is located in `kin-core-api/`.
+
+### Structure
+```
+kin-core-api/
+├── bruno.json              # Collection config
+├── environments/
+│   └── local.bru           # Environment variables (base_url, grpc_url, auth_token)
+├── rest/                   # REST endpoints (via gRPC-Gateway)
+│   ├── UserService/
+│   │   ├── GetMe.bru
+│   │   ├── UpdateProfile.bru
+│   │   ├── UpdateTimezone.bru
+│   │   ├── GetPreferences.bru
+│   │   └── UpdatePreferences.bru
+│   └── CircleService/
+│       ├── CreateCircle.bru
+│       ├── ListCircles.bru
+│       ├── GetCircle.bru
+│       ├── UpdateCircle.bru
+│       ├── DeleteCircle.bru
+│       ├── LeaveCircle.bru
+│       ├── ListMembers.bru
+│       ├── AddMember.bru
+│       ├── RemoveMember.bru
+│       ├── GetSharingPreference.bru
+│       ├── UpdateSharingPreference.bru
+│       ├── CreateInvitation.bru
+│       └── AcceptInvitation.bru
+└── grpc/                   # Native gRPC endpoints
+    ├── UserService/
+    │   ├── GetMe.bru
+    │   ├── UpdateProfile.bru
+    │   ├── UpdateTimezone.bru
+    │   ├── GetPreferences.bru
+    │   └── UpdatePreferences.bru
+    └── CircleService/
+        ├── CreateCircle.bru
+        ├── ListCircles.bru
+        ├── GetCircle.bru
+        ├── UpdateCircle.bru
+        ├── DeleteCircle.bru
+        ├── LeaveCircle.bru
+        ├── ListMembers.bru
+        ├── AddMember.bru
+        ├── RemoveMember.bru
+        ├── GetSharingPreference.bru
+        ├── UpdateSharingPreference.bru
+        ├── CreateInvitation.bru
+        └── AcceptInvitation.bru
+```
+
+### Environment Variables
+
+Set `auth_token` in Bruno's environment settings (stored as secret, not committed).
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `base_url` | REST API base URL | `http://localhost:8080` |
+| `grpc_url` | gRPC server URL | `localhost:50051` |
+| `auth_token` | JWT bearer token (secret) | - |
+
+### Maintaining the Collection
+
+**IMPORTANT**: When modifying proto files in `proto/kin/v1/`, update the Bruno collection accordingly:
+
+1. **Adding new RPC endpoints**: Create `.bru` files in both `rest/{Service}/` and `grpc/{Service}/`
+2. **Removing RPC endpoints**: Delete the corresponding `.bru` files from both folders
+3. **Modifying request/response fields**: Update `body:json` (REST) and `body:grpc-json` (gRPC) sections
+4. **Adding new services**: Create new folders under both `rest/` and `grpc/`
+
+### Bruno File Templates
+
+**REST Endpoint:**
+```bru
+meta {
+  name: EndpointName
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/v1/path
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "field": "value"
+  }
+}
+```
+
+**gRPC Endpoint:**
+```bru
+meta {
+  name: EndpointName
+  type: grpc
+  seq: 1
+}
+
+grpc {
+  url: {{grpc_url}}/kin.v1.ServiceName/MethodName
+  body: json
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc-json {
+  {
+    "field": "value"
+  }
+}
+```

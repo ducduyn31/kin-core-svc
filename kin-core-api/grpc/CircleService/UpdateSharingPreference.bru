@@ -1,0 +1,32 @@
+meta {
+  name: UpdateSharingPreference
+  type: grpc
+  seq: 11
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/UpdateSharingPreference
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "circle_id": "your-circle-id-here",
+      "privacy_level": "PRIVACY_LEVEL_STATUS",
+      "share_timezone": true,
+      "share_availability": true,
+      "share_location": false,
+      "location_precision": "LOCATION_PRECISION_CITY",
+      "share_activity": true
+    }
+  '''
+}

@@ -1,0 +1,24 @@
+meta {
+  name: GetMe
+  type: grpc
+  seq: 1
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.UserService/GetMe
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {}
+  '''
+}

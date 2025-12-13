@@ -1,0 +1,21 @@
+meta {
+  name: UpdateTimezone
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{base_url}}/api/v1/users/me/timezone
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "timezone": "America/New_York"
+  }
+}
