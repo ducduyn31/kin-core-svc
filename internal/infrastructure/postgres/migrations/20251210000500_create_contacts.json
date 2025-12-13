@@ -1,5 +1,4 @@
 {
-  "name": "20251210000500_create_contacts",
   "operations": [
     {
       "create_table": {
@@ -15,6 +14,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_contacts_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -25,6 +25,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_contacts_contact_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -66,7 +67,7 @@
       "create_index": {
         "name": "idx_contacts_user_contact",
         "table": "contacts",
-        "columns": ["user_id", "contact_id"],
+        "columns": {"user_id": {}, "contact_id": {}},
         "unique": true
       }
     },
@@ -74,7 +75,7 @@
       "create_index": {
         "name": "idx_contacts_user",
         "table": "contacts",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     },
     {
@@ -91,6 +92,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_contact_requests_from_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -101,6 +103,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_contact_requests_to_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -136,14 +139,14 @@
       "create_index": {
         "name": "idx_contact_requests_to_user",
         "table": "contact_requests",
-        "columns": ["to_user_id", "status"]
+        "columns": {"to_user_id": {}, "status": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_contact_requests_from_to",
         "table": "contact_requests",
-        "columns": ["from_user_id", "to_user_id"]
+        "columns": {"from_user_id": {}, "to_user_id": {}}
       }
     }
   ]

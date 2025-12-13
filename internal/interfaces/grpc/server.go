@@ -15,16 +15,16 @@ import (
 )
 
 type ServerConfig struct {
-	Logger          *slog.Logger
-	Auth0Validator  *auth.Auth0Validator
-	UserService     *user.Service
-	CircleService   *circle.Service
+	Logger           *slog.Logger
+	Auth0Validator   *auth.Auth0Validator
+	UserService      *user.Service
+	CircleService    *circle.Service
 	EnableReflection bool
 }
 
 type Server struct {
-	grpcServer    *grpc.Server
-	logger        *slog.Logger
+	grpcServer *grpc.Server
+	logger     *slog.Logger
 }
 
 func NewServer(cfg ServerConfig) *Server {
@@ -85,4 +85,3 @@ func (s *Server) ServeWithListener(lis net.Listener) error {
 	s.logger.Info("gRPC server listening", "address", lis.Addr().String())
 	return s.grpcServer.Serve(lis)
 }
-

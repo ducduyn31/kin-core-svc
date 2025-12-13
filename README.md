@@ -23,8 +23,11 @@ Kin helps you know when your people are available. Share as much or as little as
 ### Prerequisites
 
 - Docker and Docker Compose
-- Go 1.23+ (for local development)
-- [buf](https://buf.build/) (for proto generation)
+- [Nix](https://nixos.org/download/) (recommended) or manually install:
+  - Go 1.23+
+  - [buf](https://buf.build/)
+  - [go-task](https://taskfile.dev/)
+  - golangci-lint, pgroll, air, grpcurl
 - Auth0 account
 
 ### Quick Start
@@ -35,28 +38,37 @@ git clone https://github.com/danielng/kin-core-svc.git
 cd kin-core-svc
 ```
 
-2. Copy `.env.example` to `.env` and configure
+2. Set up development environment
+```bash
+# Using Nix (recommended)
+nix develop --command zsh
+
+# Or with direnv (auto-activates when entering directory)
+direnv allow
+```
+
+3. Copy `.env.example` to `.env` and configure
 ```bash
 cp .env.example .env
 # Edit .env with your Auth0 credentials
 ```
 
-3. Run infrastructure services
+4. Run infrastructure services
 ```bash
 task docker:up
 ```
 
-4. Generate code (protobuf, gRPC, Bob models)
+5. Generate code (protobuf, gRPC, Bob models)
 ```bash
 task generate
 ```
 
-5. Run database migrations
+6. Run database migrations
 ```bash
 task migrate:up
 ```
 
-6. Run the application
+7. Run the application
 ```bash
 task run
 ```
@@ -98,7 +110,7 @@ task migrate:up      # Run all migrations
 
 ### Project Structure
 
-```
+```text
 kin/
 ├── cmd/api/              # Application entry point
 ├── proto/                # Protocol buffer definitions

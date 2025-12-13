@@ -2,11 +2,11 @@ syntax = "proto3";
 
 package kin.v1;
 
-option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
-
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "kin/v1/common.proto";
+
+option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
 
 service CircleService {
   rpc CreateCircle(CreateCircleRequest) returns (CreateCircleResponse) {
@@ -17,15 +17,11 @@ service CircleService {
   }
 
   rpc ListCircles(ListCirclesRequest) returns (ListCirclesResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/circles"
-    };
+    option (google.api.http) = {get: "/api/v1/circles"};
   }
 
   rpc GetCircle(GetCircleRequest) returns (GetCircleResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/circles/{circle_id}"
-    };
+    option (google.api.http) = {get: "/api/v1/circles/{circle_id}"};
   }
 
   rpc UpdateCircle(UpdateCircleRequest) returns (UpdateCircleResponse) {
@@ -36,21 +32,15 @@ service CircleService {
   }
 
   rpc DeleteCircle(DeleteCircleRequest) returns (DeleteCircleResponse) {
-    option (google.api.http) = {
-      delete: "/api/v1/circles/{circle_id}"
-    };
+    option (google.api.http) = {delete: "/api/v1/circles/{circle_id}"};
   }
 
   rpc LeaveCircle(LeaveCircleRequest) returns (LeaveCircleResponse) {
-    option (google.api.http) = {
-      post: "/api/v1/circles/{circle_id}/leave"
-    };
+    option (google.api.http) = {post: "/api/v1/circles/{circle_id}/leave"};
   }
 
   rpc ListMembers(ListMembersRequest) returns (ListMembersResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/circles/{circle_id}/members"
-    };
+    option (google.api.http) = {get: "/api/v1/circles/{circle_id}/members"};
   }
 
   rpc AddMember(AddMemberRequest) returns (AddMemberResponse) {
@@ -61,15 +51,11 @@ service CircleService {
   }
 
   rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse) {
-    option (google.api.http) = {
-      delete: "/api/v1/circles/{circle_id}/members/{member_id}"
-    };
+    option (google.api.http) = {delete: "/api/v1/circles/{circle_id}/members/{member_id}"};
   }
 
   rpc GetSharingPreference(GetSharingPreferenceRequest) returns (GetSharingPreferenceResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/circles/{circle_id}/sharing"
-    };
+    option (google.api.http) = {get: "/api/v1/circles/{circle_id}/sharing"};
   }
 
   rpc UpdateSharingPreference(UpdateSharingPreferenceRequest) returns (UpdateSharingPreferenceResponse) {
@@ -89,6 +75,7 @@ service CircleService {
   rpc AcceptInvitation(AcceptInvitationRequest) returns (AcceptInvitationResponse) {
     option (google.api.http) = {
       post: "/api/v1/circles/join"
+      body: "*"
     };
   }
 }

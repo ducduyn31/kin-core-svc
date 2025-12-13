@@ -1,5 +1,4 @@
 {
-  "name": "20251210000700_create_locations",
   "operations": [
     {
       "create_table": {
@@ -10,6 +9,7 @@
             "type": "uuid",
             "pk": true,
             "references": {
+              "name": "fk_user_locations_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -99,6 +99,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_location_history_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -137,7 +138,7 @@
       "create_index": {
         "name": "idx_location_history_user_created",
         "table": "location_history",
-        "columns": ["user_id", "created_at"]
+        "columns": {"user_id": {}, "created_at": {}}
       }
     },
     {
@@ -154,6 +155,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_places_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -214,7 +216,7 @@
       "create_index": {
         "name": "idx_places_user",
         "table": "places",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     },
     {
@@ -231,6 +233,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_check_ins_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -241,6 +244,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_check_ins_place_id",
               "table": "places",
               "column": "id",
               "on_delete": "CASCADE"
@@ -285,14 +289,14 @@
       "create_index": {
         "name": "idx_check_ins_user_created",
         "table": "check_ins",
-        "columns": ["user_id", "created_at"]
+        "columns": {"user_id": {}, "created_at": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_check_ins_place",
         "table": "check_ins",
-        "columns": ["place_id"]
+        "columns": {"place_id": {}}
       }
     }
   ]

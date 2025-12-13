@@ -1,5 +1,4 @@
 {
-  "name": "20251210000800_create_media",
   "operations": [
     {
       "create_table": {
@@ -15,6 +14,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_media_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -88,14 +88,14 @@
       "create_index": {
         "name": "idx_media_user",
         "table": "media",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_media_storage_key",
         "table": "media",
-        "columns": ["storage_key"]
+        "columns": {"storage_key": {}}
       }
     }
   ]

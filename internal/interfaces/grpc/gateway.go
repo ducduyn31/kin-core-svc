@@ -156,19 +156,23 @@ func (s *GatewayServer) healthHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpStatus)
-	json.NewEncoder(w).Encode(healthResponse{
+	if err := json.NewEncoder(w).Encode(healthResponse{
 		Status:       overallStatus,
 		Dependencies: dependencies,
-	})
+	}); err != nil {
+		slog.Error("failed to encode health response", "error", err)
+	}
 }
 
 func (s *GatewayServer) readyHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(readyResponse{
+	if err := json.NewEncoder(w).Encode(readyResponse{
 		Status:    "ready",
 		Version:   s.buildInfo.Version,
 		GitCommit: s.buildInfo.GitCommit,
 		BuildTime: s.buildInfo.BuildTime,
-	})
+	}); err != nil {
+		slog.Error("failed to encode ready response", "error", err)
+	}
 }

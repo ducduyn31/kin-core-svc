@@ -21,6 +21,12 @@ tasks:
     cmds:
       - task --list
 
+  ## Setup
+
+  setup:
+    desc: Install development dependencies
+    deps: [bob:install, deps]
+
   ## Build
 
   build:
@@ -56,6 +62,20 @@ tasks:
       - echo "Running tests with coverage..."
       - go test -v -race -coverprofile=coverage.out ./...
       - go tool cover -html=coverage.out -o coverage.html
+
+  ## Formatting
+
+  format:
+    desc: Format code and fix lint issues
+    cmds:
+      - echo "Formatting Go code..."
+      - find . -name '*.go' -not -path './gen/*' -not -path './internal/infrastructure/postgres/models/*' | xargs gofmt -s -w
+      - find . -name '*.go' -not -path './gen/*' -not -path './internal/infrastructure/postgres/models/*' | xargs goimports -w
+      - echo "Formatting proto files..."
+      - buf format -w
+      - echo "Fixing lint issues..."
+      - golangci-lint run --fix ./...
+      - echo "Formatting complete."
 
   ## Linting
 
@@ -107,6 +127,12 @@ tasks:
 
   ## Database Migrations (pgroll)
 
+  migrate:init:
+    desc: Initialize pgroll in the database
+    cmds:
+      - echo "Initializing pgroll..."
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" init
+
   migrate:new:
     desc: Create a new migration file (task migrate:new NAME="create foo")
     cmds:
@@ -122,19 +148,20 @@ tasks:
   migrate:up:
     desc: Run all migrations
     cmds:
-      - echo "Running all migrations..."
+      - echo "Checking pgroll status..."
       - |
-        for file in {{.MIGRATIONS_DIR}}/*.json; do
-          echo "Starting migration: $file"
-          pgroll start "$file"
-          pgroll complete
-        done
+        if ! pgroll --postgres-url "$DATABASE_WRITE_URL" status > /dev/null 2>&1; then
+          echo "pgroll not initialized, initializing..."
+          pgroll --postgres-url "$DATABASE_WRITE_URL" init
+        fi
+      - echo "Running all migrations..."
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" migrate --complete {{.MIGRATIONS_DIR}}
 
   migrate:start:
     desc: Start a specific migration (task migrate:start FILE=xxx.json)
     cmds:
       - echo "Starting migration {{.FILE}}..."
-      - pgroll start {{.MIGRATIONS_DIR}}/{{.FILE}}
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" start {{.MIGRATIONS_DIR}}/{{.FILE}}
     requires:
       vars: [FILE]
 
@@ -142,19 +169,19 @@ tasks:
     desc: Complete current migration
     cmds:
       - echo "Completing migration..."
-      - pgroll complete
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" complete
 
   migrate:rollback:
     desc: Rollback current migration
     cmds:
       - echo "Rolling back migration..."
-      - pgroll rollback
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" rollback
 
   migrate:status:
     desc: Show migration status
     cmds:
       - echo "Migration status..."
-      - pgroll status
+      - pgroll --postgres-url "$DATABASE_WRITE_URL" status
 
   ## Code Generation
 
@@ -190,11 +217,19 @@ tasks:
 
   ## Bob Code Generation
 
+  bob:install:
+    desc: Install bobgen-psql
+    status:
+      - test -f ${GOBIN:-$HOME/go/bin}/bobgen-psql
+    cmds:
+      - go install github.com/stephenafamo/bob/gen/bobgen-psql@v0.42.0
+
   bob:generate:
     desc: Generate Bob models
+    deps: [bob:install]
     cmds:
       - echo "Generating Bob models..."
-      - bob-gen psql
+      - PSQL_DSN="$DATABASE_WRITE_URL" bobgen-psql
 
   ## Clean
 

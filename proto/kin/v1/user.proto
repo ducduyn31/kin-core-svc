@@ -2,18 +2,15 @@ syntax = "proto3";
 
 package kin.v1;
 
-option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
-
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "google/protobuf/wrappers.proto";
 import "kin/v1/common.proto";
+
+option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
 
 service UserService {
   rpc GetMe(GetMeRequest) returns (GetMeResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/users/me"
-    };
+    option (google.api.http) = {get: "/api/v1/users/me"};
   }
 
   rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse) {
@@ -31,9 +28,7 @@ service UserService {
   }
 
   rpc GetPreferences(GetPreferencesRequest) returns (GetPreferencesResponse) {
-    option (google.api.http) = {
-      get: "/api/v1/users/me/preferences"
-    };
+    option (google.api.http) = {get: "/api/v1/users/me/preferences"};
   }
 
   rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse) {

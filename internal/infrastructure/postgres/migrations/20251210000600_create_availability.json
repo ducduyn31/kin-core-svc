@@ -1,5 +1,4 @@
 {
-  "name": "20251210000600_create_availability",
   "operations": [
     {
       "create_table": {
@@ -10,6 +9,7 @@
             "type": "uuid",
             "pk": true,
             "references": {
+              "name": "fk_user_availability_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -60,6 +60,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_availability_windows_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -115,14 +116,14 @@
       "create_index": {
         "name": "idx_availability_windows_user",
         "table": "availability_windows",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     },
     {
       "create_index": {
         "name": "idx_availability_windows_user_weekday",
         "table": "availability_windows",
-        "columns": ["user_id", "weekday"]
+        "columns": {"user_id": {}, "weekday": {}}
       }
     },
     {
@@ -139,6 +140,7 @@
             "type": "uuid",
             "nullable": false,
             "references": {
+              "name": "fk_availability_auto_rules_user_id",
               "table": "users",
               "column": "id",
               "on_delete": "CASCADE"
@@ -190,7 +192,7 @@
       "create_index": {
         "name": "idx_auto_rules_user",
         "table": "availability_auto_rules",
-        "columns": ["user_id"]
+        "columns": {"user_id": {}}
       }
     }
   ]

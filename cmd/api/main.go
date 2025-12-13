@@ -101,10 +101,11 @@ func main() {
 		EnableReflection: cfg.GRPC.EnableReflection,
 	})
 
+	errCh := make(chan error, 2)
+
 	go func() {
 		if err := grpc.Serve(cfg.GRPC.Address()); err != nil {
-			logger.Error("gRPC server error", "error", err)
-			os.Exit(1)
+			errCh <- fmt.Errorf("gRPC server error: %w", err)
 		}
 	}()
 
@@ -134,13 +135,21 @@ func main() {
 	go func() {
 		logger.Info("gRPC-Gateway listening", "address", cfg.GRPC.GatewayAddress())
 		if err := gatewayServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Error("gRPC-Gateway error", "error", err)
+			errCh <- fmt.Errorf("gRPC-Gateway error: %w", err)
 		}
 	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+
+	var exitCode int
+	select {
+	case sig := <-quit:
+		logger.Info("received shutdown signal", "signal", sig)
+	case err := <-errCh:
+		logger.Error("server error", "error", err)
+		exitCode = 1
+	}
 
 	logger.Info("shutting down servers...")
 
@@ -154,6 +163,10 @@ func main() {
 	grpc.GracefulStop()
 
 	logger.Info("servers stopped")
+
+	if exitCode != 0 {
+		os.Exit(exitCode)
+	}
 }
 
 func setupLogger(cfg config.LoggingConfig) *slog.Logger {

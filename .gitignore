@@ -43,6 +43,12 @@ logs/
 tmp/
 temp/
 
+# Nix
+result
+result-*
+.direnv/
+.nix-go/
+
 # Build artifacts
 dist/
 

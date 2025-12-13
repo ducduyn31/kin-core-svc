@@ -4,8 +4,6 @@ package kin.v1;
 
 option go_package = "github.com/danielng/kin-core-svc/gen/proto/kin/v1;kinv1";
 
-import "google/protobuf/timestamp.proto";
-
 message Empty {}
 
 message PaginationRequest {

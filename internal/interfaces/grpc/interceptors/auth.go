@@ -21,8 +21,8 @@ const (
 )
 
 type AuthInterceptor struct {
-	validator   *auth.Auth0Validator
-	userService *user.Service
+	validator     *auth.Auth0Validator
+	userService   *user.Service
 	publicMethods map[string]bool
 }
 
@@ -90,7 +90,15 @@ func (i *AuthInterceptor) authenticate(ctx context.Context) (context.Context, er
 		return nil, status.Error(codes.Unauthenticated, "missing authorization header")
 	}
 
-	token := strings.TrimPrefix(values[0], "Bearer ")
+	authHeader := values[0]
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return nil, status.Error(codes.Unauthenticated, "invalid authorization header format")
+	}
+	token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+	if token == "" {
+		return nil, status.Error(codes.Unauthenticated, "missing token")
+	}
+
 	claims, err := i.validator.ValidateToken(ctx, token)
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "invalid token")

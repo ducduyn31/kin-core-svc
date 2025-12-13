@@ -109,10 +109,10 @@ func (h *UserHandler) UpdatePreferences(ctx context.Context, req *kinv1.UpdatePr
 	}
 
 	cmd := user.UpdatePreferencesCommand{
-		UserID:            userID,
-		ShowOnlineStatus:  req.ShowOnlineStatus,
-		ShowLastSeen:      req.ShowLastSeen,
-		ShowReadReceipts:  req.ShowReadReceipts,
+		UserID:                userID,
+		ShowOnlineStatus:      req.ShowOnlineStatus,
+		ShowLastSeen:          req.ShowLastSeen,
+		ShowReadReceipts:      req.ShowReadReceipts,
 		AllowContactDiscovery: req.AllowContactDiscovery,
 		PushNotifications:     req.PushNotifications,
 		EmailNotifications:    req.EmailNotifications,
