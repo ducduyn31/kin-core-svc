@@ -34,9 +34,9 @@ logging:
   format: "json"
 
 telemetry:
-  enabled: true
+  enabled: false  # Enable per-environment; startup fails if OTLP endpoint unreachable
   service_name: "kin-core-svc"
-  # otlp_endpoint should be set via OTEL_EXPORTER_OTLP_ENDPOINT env var
+  # otlp_endpoint: Set via OTEL_EXPORTER_OTLP_ENDPOINT env var (default: localhost:4317)
 
 presence:
   ttl: 5m

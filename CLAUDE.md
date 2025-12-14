@@ -296,7 +296,7 @@ Generated files:
 The Bruno collection for testing both REST and gRPC endpoints is located in `kin-core-api/`.
 
 ### Structure
-```
+```text
 kin-core-api/
 ├── bruno.json              # Collection config
 ├── environments/
@@ -363,6 +363,16 @@ Set `auth_token` in Bruno's environment settings (stored as secret, not committe
 2. **Removing RPC endpoints**: Delete the corresponding `.bru` files from both folders
 3. **Modifying request/response fields**: Update `body:json` (REST) and `body:grpc-json` (gRPC) sections
 4. **Adding new services**: Create new folders under both `rest/` and `grpc/`
+
+### Sequence Numbering Convention
+
+The `meta.seq` field controls sort order in Bruno's UI. **Seq must be unique within each service folder**, not globally:
+- `grpc/UserService/` - seq 1-5
+- `grpc/CircleService/` - seq 1-13
+- `rest/UserService/` - seq 1-5
+- `rest/CircleService/` - seq 1-13
+
+When adding new endpoints, use the next available seq number within the target service folder.
 
 ### Bruno File Templates
 

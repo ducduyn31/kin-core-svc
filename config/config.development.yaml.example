@@ -10,6 +10,8 @@ logging:
 telemetry:
   enabled: false
   service_name: "kin-core-svc"
+  # otlp_endpoint can be set here for local dev convenience, but
+  # OTEL_EXPORTER_OTLP_ENDPOINT env var takes precedence if set
   otlp_endpoint: "localhost:4317"
 
 s3:
