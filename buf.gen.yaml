@@ -1,11 +1,11 @@
 version: v2
 inputs:
-  - module: buf.build/danielng/kin-core-svc
+  - module: buf.build/coffeewithegg/kin-core-svc
 managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/danielng/kin-core-svc/gen/proto
+      value: github.com/coffeewithegg/kin-core-svc/gen/proto
   disable:
     - file_option: go_package_prefix
       module: buf.build/googleapis/googleapis

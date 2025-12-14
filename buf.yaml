@@ -1,7 +1,7 @@
 version: v2
 modules:
   - path: proto
-    name: buf.build/danielng/kin-core-svc
+    name: buf.build/coffeewithegg/kin-core-svc
 deps:
   - buf.build/googleapis/googleapis
 lint:
