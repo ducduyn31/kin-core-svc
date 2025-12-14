@@ -1,0 +1,26 @@
+meta {
+  name: UpdateCircle
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{base_url}}/api/v1/circles/:circle_id
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+params:path {
+  circle_id: {{circle_id}}
+}
+
+body:json {
+  {
+    "name": "Updated Circle Name",
+    "description": "Updated description"
+  }
+}

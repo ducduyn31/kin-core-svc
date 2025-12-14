@@ -31,6 +31,10 @@ go.work
 .env.local
 .env.*.local
 
+# Local config overrides (use .example as template)
+config/config.development.yaml
+config/config.local.yaml
+
 # OS files
 .DS_Store
 Thumbs.db

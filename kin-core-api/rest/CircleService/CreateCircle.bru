@@ -1,0 +1,22 @@
+meta {
+  name: CreateCircle
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/api/v1/circles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "name": "Family",
+    "description": "My family circle"
+  }
+}

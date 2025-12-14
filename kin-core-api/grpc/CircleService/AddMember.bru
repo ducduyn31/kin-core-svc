@@ -1,0 +1,28 @@
+meta {
+  name: AddMember
+  type: grpc
+  seq: 8
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/AddMember
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "circle_id": "{{circle_id}}",
+      "user_id": "user-uuid-here",
+      "role": "MEMBER_ROLE_MEMBER"
+    }
+  '''
+}

@@ -1,0 +1,32 @@
+{
+  "version": "1",
+  "name": "kin-core-api",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ],
+  "presets": {
+    "requestType": "http",
+    "requestUrl": ""
+  },
+  "protobuf": {
+    "protoPaths": [
+      "../proto"
+    ],
+    "protoFiles": [
+      {
+        "path": "../proto/kin/v1/user.proto",
+        "type": "file"
+      },
+      {
+        "path": "../proto/kin/v1/common.proto",
+        "type": "file"
+      },
+      {
+        "path": "../proto/kin/v1/circle.proto",
+        "type": "file"
+      }
+    ]
+  }
+}

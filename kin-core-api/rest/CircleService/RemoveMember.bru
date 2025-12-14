@@ -1,0 +1,20 @@
+meta {
+  name: RemoveMember
+  type: http
+  seq: 9
+}
+
+delete {
+  url: {{base_url}}/api/v1/circles/:circle_id/members/:member_id
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+params:path {
+  circle_id: {{circle_id}}
+  member_id: {{member_id}}
+}

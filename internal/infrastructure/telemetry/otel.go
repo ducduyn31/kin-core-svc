@@ -22,11 +22,20 @@ type Config struct {
 
 type Telemetry struct {
 	tracerProvider *sdktrace.TracerProvider
+	enabled        bool
+}
+
+func (t *Telemetry) TracerProvider() *sdktrace.TracerProvider {
+	return t.tracerProvider
+}
+
+func (t *Telemetry) Enabled() bool {
+	return t.enabled
 }
 
 func New(ctx context.Context, cfg Config) (*Telemetry, error) {
 	if !cfg.Enabled {
-		return &Telemetry{}, nil
+		return &Telemetry{enabled: false}, nil
 	}
 
 	res, err := resource.New(ctx,
@@ -60,7 +69,7 @@ func New(ctx context.Context, cfg Config) (*Telemetry, error) {
 		propagation.Baggage{},
 	))
 
-	return &Telemetry{tracerProvider: tp}, nil
+	return &Telemetry{tracerProvider: tp, enabled: true}, nil
 }
 
 func (t *Telemetry) Shutdown(ctx context.Context) error {

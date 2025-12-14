@@ -1,0 +1,27 @@
+meta {
+  name: RemoveMember
+  type: grpc
+  seq: 9
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/RemoveMember
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "circle_id": "{{circle_id}}",
+      "member_id": "{{member_id}}"
+    }
+  '''
+}

@@ -47,10 +47,13 @@ nix develop --command zsh
 direnv allow
 ```
 
-3. Copy `.env.example` to `.env` and configure
+3. Copy environment and config templates
 ```bash
 cp .env.example .env
-# Edit .env with your Auth0 credentials
+# Edit .env with your Auth0 credentials and database URLs
+
+cp config/config.development.yaml.example config/config.development.yaml
+# Customize local dev settings as needed
 ```
 
 4. Run infrastructure services

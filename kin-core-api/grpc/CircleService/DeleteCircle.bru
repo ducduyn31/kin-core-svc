@@ -1,0 +1,26 @@
+meta {
+  name: DeleteCircle
+  type: grpc
+  seq: 5
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.CircleService/DeleteCircle
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "circle_id": "{{circle_id}}"
+    }
+  '''
+}

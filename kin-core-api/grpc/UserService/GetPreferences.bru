@@ -1,0 +1,24 @@
+meta {
+  name: GetPreferences
+  type: grpc
+  seq: 4
+}
+
+grpc {
+  url: {{grpc_url}}
+  method: /kin.v1.UserService/GetPreferences
+  body: grpc
+  auth: bearer
+  methodType: unary
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:grpc {
+  name: message 1
+  content: '''
+    {}
+  '''
+}
