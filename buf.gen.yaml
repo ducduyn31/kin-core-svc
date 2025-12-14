@@ -1,4 +1,6 @@
 version: v2
+inputs:
+  - module: buf.build/danielng/kin-core-svc
 managed:
   enabled: true
   override:
