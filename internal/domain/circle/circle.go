@@ -29,11 +29,13 @@ func NewCircle(name string, description *string, createdBy uuid.UUID) *Circle {
 	}
 }
 
-func (c *Circle) Update(name string, description *string) {
-	if name != "" {
-		c.Name = name
+func (c *Circle) Update(name *string, description *string) {
+	if name != nil {
+		c.Name = *name
 	}
-	c.Description = description
+	if description != nil {
+		c.Description = description
+	}
 	c.UpdatedAt = time.Now()
 }
 

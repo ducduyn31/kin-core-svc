@@ -10,6 +10,7 @@ import (
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpcreflect"
+	"connectrpc.com/otelconnect"
 	"github.com/danielng/kin-core-svc/gen/proto/kin/v1/kinv1connect"
 	"github.com/danielng/kin-core-svc/internal/application/circle"
 	"github.com/danielng/kin-core-svc/internal/application/user"
@@ -49,17 +50,29 @@ type Server struct {
 	healthCheckers []HealthChecker
 }
 
-func NewServer(cfg ServerConfig) *Server {
+func NewServer(cfg ServerConfig) (*Server, error) {
 	mux := http.NewServeMux()
 
 	authInterceptor := interceptors.NewAuthInterceptor(cfg.Auth0Validator, cfg.UserService)
 	recoveryInterceptor := interceptors.NewRecoveryInterceptor(cfg.Logger)
 
+	interceptorChain := []connect.Interceptor{recoveryInterceptor}
+
+	if cfg.EnableTracing {
+		otelInterceptor, err := otelconnect.NewInterceptor(
+			otelconnect.WithoutServerPeerAttributes(),
+		)
+		if err != nil {
+			return nil, err
+		}
+		interceptorChain = append(interceptorChain, otelInterceptor)
+		cfg.Logger.Info("OpenTelemetry tracing enabled for Connect RPC")
+	}
+
+	interceptorChain = append(interceptorChain, authInterceptor)
+
 	handlerOpts := []connect.HandlerOption{
-		connect.WithInterceptors(
-			recoveryInterceptor,
-			authInterceptor,
-		),
+		connect.WithInterceptors(interceptorChain...),
 	}
 
 	userHandler := handlers.NewUserHandler(cfg.UserService)
@@ -93,7 +106,7 @@ func NewServer(cfg ServerConfig) *Server {
 
 	server.handler = h2c.NewHandler(mux, &http2.Server{})
 
-	return server
+	return server, nil
 }
 
 func (s *Server) Handler() http.Handler {
