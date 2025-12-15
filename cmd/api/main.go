@@ -17,7 +17,7 @@ import (
 	"github.com/danielng/kin-core-svc/internal/infrastructure/postgres"
 	"github.com/danielng/kin-core-svc/internal/infrastructure/redis"
 	"github.com/danielng/kin-core-svc/internal/infrastructure/telemetry"
-	grpcServer "github.com/danielng/kin-core-svc/internal/interfaces/grpc"
+	connectServer "github.com/danielng/kin-core-svc/internal/interfaces/connect"
 )
 
 var (
@@ -39,8 +39,7 @@ func main() {
 		"version", Version,
 		"git_commit", GitCommit,
 		"build_time", BuildTime,
-		"grpc_port", cfg.GRPC.Port,
-		"gateway_port", cfg.GRPC.GatewayPort,
+		"port", cfg.Server.Port,
 	)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -97,50 +96,34 @@ func main() {
 	userService := user.NewService(userRepo, logger)
 	circleService := circle.NewService(circleRepo, logger)
 
-	grpc := grpcServer.NewServer(grpcServer.ServerConfig{
-		Logger:           logger,
-		Auth0Validator:   auth0Validator,
-		UserService:      userService,
-		CircleService:    circleService,
-		EnableReflection: cfg.GRPC.EnableReflection,
-		EnableTracing:    otel.Enabled(),
-	})
-
-	errCh := make(chan error, 2)
-
-	go func() {
-		if err := grpc.Serve(cfg.GRPC.Address()); err != nil {
-			errCh <- fmt.Errorf("gRPC server error: %w", err)
-		}
-	}()
-
-	gatewayCtx := context.Background()
-	gateway, err := grpcServer.NewGatewayServer(gatewayCtx, grpcServer.GatewayConfig{
-		GRPCAddress: cfg.GRPC.Address(),
-		Logger:      logger,
-		BuildInfo: grpcServer.BuildInfo{
+	server := connectServer.NewServer(connectServer.ServerConfig{
+		Logger:         logger,
+		Auth0Validator: auth0Validator,
+		UserService:    userService,
+		CircleService:  circleService,
+		BuildInfo: connectServer.BuildInfo{
 			Version:   Version,
 			GitCommit: GitCommit,
 			BuildTime: BuildTime,
 		},
-		HealthCheckers: []grpcServer.HealthChecker{db, redisClient},
+		HealthCheckers:   []connectServer.HealthChecker{db, redisClient},
+		EnableTracing:    otel.Enabled(),
+		EnableReflection: cfg.Server.EnableReflection,
 	})
-	if err != nil {
-		logger.Error("failed to create gRPC gateway", "error", err)
-		os.Exit(1)
-	}
 
-	gatewayServer := &http.Server{
-		Addr:         cfg.GRPC.GatewayAddress(),
-		Handler:      gateway.Handler(),
+	httpServer := &http.Server{
+		Addr:         cfg.Server.Address(),
+		Handler:      server.Handler(),
 		ReadTimeout:  cfg.Server.ReadTimeout,
 		WriteTimeout: cfg.Server.WriteTimeout,
 	}
 
+	errCh := make(chan error, 1)
+
 	go func() {
-		logger.Info("gRPC-Gateway listening", "address", cfg.GRPC.GatewayAddress())
-		if err := gatewayServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			errCh <- fmt.Errorf("gRPC-Gateway error: %w", err)
+		logger.Info("Connect server listening", "address", cfg.Server.Address())
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			errCh <- fmt.Errorf("server error: %w", err)
 		}
 	}()
 
@@ -156,18 +139,16 @@ func main() {
 		exitCode = 1
 	}
 
-	logger.Info("shutting down servers...")
+	logger.Info("shutting down server...")
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.Server.ShutdownTimeout)
 	defer shutdownCancel()
 
-	if err := gatewayServer.Shutdown(shutdownCtx); err != nil {
-		logger.Error("gRPC-Gateway forced to shutdown", "error", err)
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		logger.Error("server forced to shutdown", "error", err)
 	}
 
-	grpc.GracefulStop()
-
-	logger.Info("servers stopped")
+	logger.Info("server stopped")
 
 	if exitCode != 0 {
 		os.Exit(exitCode)

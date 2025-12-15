@@ -1,0 +1,22 @@
+meta {
+  name: UpdateProfile
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/kin.v1.UserService/UpdateProfile
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "display_name": "New Name",
+    "bio": "Updated bio"
+  }
+}

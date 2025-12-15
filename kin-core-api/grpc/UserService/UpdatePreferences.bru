@@ -5,7 +5,7 @@ meta {
 }
 
 grpc {
-  url: {{grpc_url}}
+  url: {{base_url}}
   method: /kin.v1.UserService/UpdatePreferences
   body: grpc
   auth: bearer
@@ -20,14 +20,8 @@ body:grpc {
   name: message 1
   content: '''
     {
-      "default_privacy_level": "PRIVACY_LEVEL_BASIC",
       "show_online_status": true,
-      "show_last_seen": true,
-      "show_read_receipts": true,
-      "allow_contact_discovery": true,
-      "push_notifications": true,
-      "email_notifications": false,
-      "quiet_hours_enabled": false
+      "push_notifications": true
     }
   '''
 }

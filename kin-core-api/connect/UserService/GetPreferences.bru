@@ -1,0 +1,19 @@
+meta {
+  name: GetPreferences
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/kin.v1.UserService/GetPreferences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {}
+}

@@ -1,7 +1,6 @@
-grpc:
-  port: 50051
-  enable_reflection: true
-  gateway_port: 8080
+server:
+  port: 8080
+  enable_reflection: true  # Enable gRPC reflection for development tools
 
 logging:
   level: "debug"

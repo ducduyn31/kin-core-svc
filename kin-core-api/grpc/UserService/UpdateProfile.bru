@@ -5,7 +5,7 @@ meta {
 }
 
 grpc {
-  url: {{grpc_url}}
+  url: {{base_url}}
   method: /kin.v1.UserService/UpdateProfile
   body: grpc
   auth: bearer
@@ -20,9 +20,8 @@ body:grpc {
   name: message 1
   content: '''
     {
-      "display_name": "John Doe",
-      "bio": "Hello world",
-      "avatar": "https://example.com/avatar.png"
+      "display_name": "New Name",
+      "bio": "Updated bio"
     }
   '''
 }

@@ -1,0 +1,23 @@
+meta {
+  name: AddMember
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/kin.v1.CircleService/AddMember
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "circle_id": "00000000-0000-0000-0000-000000000000",
+    "user_id": "00000000-0000-0000-0000-000000000001",
+    "role": "MEMBER_ROLE_MEMBER"
+  }
+}
