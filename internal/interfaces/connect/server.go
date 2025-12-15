@@ -3,6 +3,7 @@ package connect
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"sync"
@@ -10,6 +11,7 @@ import (
 
 	"connectrpc.com/connect"
 	"connectrpc.com/grpcreflect"
+	"connectrpc.com/otelconnect"
 	"github.com/danielng/kin-core-svc/gen/proto/kin/v1/kinv1connect"
 	"github.com/danielng/kin-core-svc/internal/application/circle"
 	"github.com/danielng/kin-core-svc/internal/application/user"
@@ -42,6 +44,26 @@ type ServerConfig struct {
 	EnableReflection bool // Enable gRPC reflection (for development only)
 }
 
+func (cfg ServerConfig) validate() error {
+	checks := []struct {
+		ok  bool
+		msg string
+	}{
+		{cfg.Logger != nil, "Logger is required"},
+		{cfg.Auth0Validator != nil, "Auth0Validator is required"},
+		{cfg.UserService != nil, "UserService is required"},
+		{cfg.CircleService != nil, "CircleService is required"},
+		{cfg.BuildInfo.Version != "", "BuildInfo.Version is required"},
+		{cfg.HealthCheckers != nil, "HealthCheckers is required"},
+	}
+	for _, c := range checks {
+		if !c.ok {
+			return errors.New("connect: " + c.msg)
+		}
+	}
+	return nil
+}
+
 type Server struct {
 	handler        http.Handler
 	logger         *slog.Logger
@@ -49,17 +71,33 @@ type Server struct {
 	healthCheckers []HealthChecker
 }
 
-func NewServer(cfg ServerConfig) *Server {
+func NewServer(cfg ServerConfig) (*Server, error) {
+	if err := cfg.validate(); err != nil {
+		return nil, err
+	}
+
 	mux := http.NewServeMux()
 
 	authInterceptor := interceptors.NewAuthInterceptor(cfg.Auth0Validator, cfg.UserService)
 	recoveryInterceptor := interceptors.NewRecoveryInterceptor(cfg.Logger)
 
+	interceptorChain := []connect.Interceptor{recoveryInterceptor}
+
+	if cfg.EnableTracing {
+		otelInterceptor, err := otelconnect.NewInterceptor(
+			otelconnect.WithoutServerPeerAttributes(),
+		)
+		if err != nil {
+			return nil, err
+		}
+		interceptorChain = append(interceptorChain, otelInterceptor)
+		cfg.Logger.Info("OpenTelemetry tracing enabled for Connect RPC")
+	}
+
+	interceptorChain = append(interceptorChain, authInterceptor)
+
 	handlerOpts := []connect.HandlerOption{
-		connect.WithInterceptors(
-			recoveryInterceptor,
-			authInterceptor,
-		),
+		connect.WithInterceptors(interceptorChain...),
 	}
 
 	userHandler := handlers.NewUserHandler(cfg.UserService)
@@ -93,7 +131,7 @@ func NewServer(cfg ServerConfig) *Server {
 
 	server.handler = h2c.NewHandler(mux, &http2.Server{})
 
-	return server
+	return server, nil
 }
 
 func (s *Server) Handler() http.Handler {

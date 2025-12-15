@@ -96,7 +96,7 @@ func main() {
 	userService := user.NewService(userRepo, logger)
 	circleService := circle.NewService(circleRepo, logger)
 
-	server := connectServer.NewServer(connectServer.ServerConfig{
+	server, err := connectServer.NewServer(connectServer.ServerConfig{
 		Logger:         logger,
 		Auth0Validator: auth0Validator,
 		UserService:    userService,
@@ -110,6 +110,10 @@ func main() {
 		EnableTracing:    otel.Enabled(),
 		EnableReflection: cfg.Server.EnableReflection,
 	})
+	if err != nil {
+		logger.Error("failed to create connect server", "error", err)
+		os.Exit(1)
+	}
 
 	httpServer := &http.Server{
 		Addr:         cfg.Server.Address(),

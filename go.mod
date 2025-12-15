@@ -5,6 +5,7 @@ go 1.25.5
 require (
 	connectrpc.com/connect v1.19.1
 	connectrpc.com/grpcreflect v1.3.0
+	connectrpc.com/otelconnect v0.7.1
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.5
@@ -27,7 +28,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.39.0
 	golang.org/x/net v0.48.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 )
 
 require (

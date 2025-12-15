@@ -17,7 +17,7 @@ type CreateCircleCommand struct {
 type UpdateCircleCommand struct {
 	CircleID    uuid.UUID
 	UserID      uuid.UUID // For permission check
-	Name        string
+	Name        *string
 	Description *string
 }
 
