@@ -1,0 +1,22 @@
+meta {
+  name: RemoveMember
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/kin.v1.CircleService/RemoveMember
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "circle_id": "00000000-0000-0000-0000-000000000000",
+    "member_id": "00000000-0000-0000-0000-000000000001"
+  }
+}

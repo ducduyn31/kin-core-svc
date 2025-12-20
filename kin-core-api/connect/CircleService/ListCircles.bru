@@ -1,0 +1,22 @@
+meta {
+  name: ListCircles
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/kin.v1.CircleService/ListCircles
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "limit": 20,
+    "offset": 0
+  }
+}

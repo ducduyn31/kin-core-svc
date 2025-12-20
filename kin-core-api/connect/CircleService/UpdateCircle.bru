@@ -1,0 +1,23 @@
+meta {
+  name: UpdateCircle
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/kin.v1.CircleService/UpdateCircle
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "circle_id": "00000000-0000-0000-0000-000000000000",
+    "name": "Updated Family",
+    "description": "Updated description"
+  }
+}

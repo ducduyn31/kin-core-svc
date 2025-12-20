@@ -1,0 +1,21 @@
+meta {
+  name: AcceptInvitation
+  type: http
+  seq: 13
+}
+
+post {
+  url: {{base_url}}/kin.v1.CircleService/AcceptInvitation
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "code": "INVITE_CODE_HERE"
+  }
+}

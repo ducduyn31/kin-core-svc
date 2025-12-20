@@ -5,7 +5,7 @@
 | Layer | Technology |
 |-------|------------|
 | Language | Go 1.23+ |
-| API | gRPC + gRPC-Gateway (REST) |
+| API | Connect RPC (HTTP/1.1, HTTP/2, gRPC compatible) |
 | Configuration | Viper (YAML + environment variables) |
 | Database | PostgreSQL with pgx/v5 |
 | SQL Builder | Bob (github.com/stephenafamo/bob) |
@@ -28,7 +28,7 @@ interfaces → application → domain ← infrastructure
 - **Domain**: Core business logic, no external dependencies
 - **Application**: Use cases, orchestrates domain objects
 - **Infrastructure**: External implementations (database, cache, auth)
-- **Interfaces**: Entry points (gRPC handlers)
+- **Interfaces**: Entry points (Connect RPC handlers)
 
 ### Dependency Rule
 
@@ -78,14 +78,14 @@ task migrate:status
 
 ### Code Generation
 
-Generate all code (protobuf, gRPC, Bob models):
+Generate all code (protobuf, Connect, Bob models):
 ```bash
 task generate
 ```
 
 Or run individually:
 ```bash
-task proto:generate  # Generate protobuf and gRPC code
+task proto:generate  # Generate protobuf and Connect code
 task bob:generate    # Generate Bob database models
 ```
 
@@ -122,14 +122,14 @@ Auth0 handles authentication. The backend:
 2. Extracts `sub` claim to identify user
 3. Creates/retrieves local user record linked by `auth0_sub`
 
-### Auth Flow (gRPC)
+### Auth Flow (Connect RPC)
 ```
-Request → Extract JWT from metadata → Validate with Auth0 JWKS → Get/Create User → Set in Context
+Request → Extract JWT from Authorization header → Validate with Auth0 JWKS → Get/Create User → Set in Context
 ```
 
-### Getting Current User (gRPC handlers)
+### Getting Current User (Connect handlers)
 ```go
-func (h *Handler) SomeMethod(ctx context.Context, req *pb.Request) (*pb.Response, error) {
+func (h *Handler) SomeMethod(ctx context.Context, req *connect.Request[pb.SomeRequest]) (*connect.Response[pb.SomeResponse], error) {
     user := ctx.Value(interceptors.UserKey).(*domain.User)
     userID := ctx.Value(interceptors.UserIDKey).(uuid.UUID)
 }
@@ -166,7 +166,7 @@ task test
 # Run linter
 task lint
 
-# Generate all code (proto, gRPC, Bob)
+# Generate all code (proto, Connect, Bob)
 task generate
 
 # Start all migrations
@@ -186,13 +186,13 @@ task build
 
 - Define domain errors in each domain's `errors.go`
 - Wrap infrastructure errors with context
-- Use `pkg/apperror` for application errors (mapped to gRPC status codes)
+- Use `pkg/apperror` for application errors (mapped to Connect error codes)
 
 ### Naming
 
 - Use singular for domain packages: `user`, `circle`, `message`
 - Use `_repo.go` suffix for repository implementations
-- Use `_handler.go` suffix for gRPC handlers
+- Use `_handler.go` suffix for Connect handlers
 
 ### Testing
 
@@ -202,18 +202,20 @@ task build
 
 ## API
 
-The service exposes both gRPC and REST APIs:
-- **gRPC**: Native protocol buffer communication on port 50051
-- **REST**: gRPC-Gateway reverse proxy on port 8080
+The service uses Connect RPC which provides a single HTTP server supporting multiple protocols:
+- **Connect protocol**: Simple HTTP/JSON or HTTP/Protobuf
+- **gRPC protocol**: Full gRPC compatibility (HTTP/2)
+- **gRPC-Web protocol**: Browser-compatible gRPC
 
-### Ports
+All protocols are served on a single port (default: 8080).
+
+### Port
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| gRPC | 50051 | Native gRPC API |
-| REST | 8080 | gRPC-Gateway (HTTP/JSON) |
+| Connect | 8080 | HTTP server (Connect, gRPC, gRPC-Web) |
 
-### Health Endpoints (REST)
+### Health Endpoints
 
 ```bash
 # Health check (checks DB, Redis)
@@ -226,54 +228,58 @@ curl http://localhost:8080/ready
 ### Configuration
 
 ```yaml
-grpc:
-  port: 50051
-  enable_reflection: true    # For grpcurl debugging
-  gateway_port: 8080
+server:
+  port: 8080
 ```
 
 Environment variables:
-- `GRPC_PORT` - gRPC server port (default: 50051)
-- `GRPC_ENABLE_REFLECTION` - Enable reflection service for debugging
-- `GRPC_GATEWAY_PORT` - REST gateway port (default: 8080)
+- `PORT` - Server port (default: 8080)
 
 ### Services
 
 - `UserService` - User profile and preferences
 - `CircleService` - Circle management, members, invitations
 
-### Testing with grpcurl
+### Testing with curl (Connect Protocol)
+
+Connect RPC supports simple JSON over HTTP:
 
 ```bash
-# List services (requires reflection)
-grpcurl -plaintext localhost:50051 list
+# Get current user (POST with JSON)
+curl -X POST http://localhost:8080/kin.v1.UserService/GetMe \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 
+# Create circle
+curl -X POST http://localhost:8080/kin.v1.CircleService/CreateCircle \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Family", "description": "My family circle"}'
+
+# List circles
+curl -X POST http://localhost:8080/kin.v1.CircleService/ListCircles \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: application/json" \
+  -d '{"limit": 20}'
+```
+
+### Testing with grpcurl (gRPC Protocol)
+
+Connect also supports native gRPC protocol:
+
+```bash
 # Call GetMe (with auth token)
 grpcurl -plaintext \
   -H "Authorization: Bearer <token>" \
-  localhost:50051 kin.v1.UserService/GetMe
+  -d '{}' \
+  localhost:8080 kin.v1.UserService/GetMe
 
 # Create circle
 grpcurl -plaintext \
   -H "Authorization: Bearer <token>" \
   -d '{"name": "Family", "description": "My family circle"}' \
-  localhost:50051 kin.v1.CircleService/CreateCircle
-```
-
-### REST API (via gRPC-Gateway)
-
-The gateway exposes REST endpoints that proxy to gRPC:
-
-```bash
-# Get current user
-curl -H "Authorization: Bearer <token>" \
-  http://localhost:8080/api/v1/users/me
-
-# Create circle
-curl -X POST -H "Authorization: Bearer <token>" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Family", "description": "My family circle"}' \
-  http://localhost:8080/api/v1/circles
+  localhost:8080 kin.v1.CircleService/CreateCircle
 ```
 
 ### Proto Files
@@ -287,21 +293,19 @@ task proto:generate
 
 Generated files:
 - `gen/proto/kin/v1/*.pb.go` - Protobuf messages
-- `gen/proto/kin/v1/*_grpc.pb.go` - gRPC service interfaces
-- `gen/proto/kin/v1/*.pb.gw.go` - gRPC-Gateway handlers
-- `gen/openapi/kin/v1/*.swagger.json` - OpenAPI specs
+- `gen/proto/kin/v1/kinv1connect/*.connect.go` - Connect service handlers and clients
 
 ## Bruno API Collection
 
-The Bruno collection for testing both REST and gRPC endpoints is located in `kin-core-api/`.
+The Bruno collection for testing Connect endpoints is located in `kin-core-api/`.
 
 ### Structure
 ```text
 kin-core-api/
 ├── bruno.json              # Collection config
 ├── environments/
-│   └── local.bru           # Environment variables (base_url, grpc_url, auth_token)
-├── rest/                   # REST endpoints (via gRPC-Gateway)
+│   └── local.bru           # Environment variables (base_url, auth_token)
+├── connect/                # Connect protocol endpoints (HTTP/JSON)
 │   ├── UserService/
 │   │   ├── GetMe.bru
 │   │   ├── UpdateProfile.bru
@@ -322,7 +326,7 @@ kin-core-api/
 │       ├── UpdateSharingPreference.bru
 │       ├── CreateInvitation.bru
 │       └── AcceptInvitation.bru
-└── grpc/                   # Native gRPC endpoints
+└── grpc/                   # gRPC protocol endpoints
     ├── UserService/
     │   ├── GetMe.bru
     │   ├── UpdateProfile.bru
@@ -351,32 +355,31 @@ Set `auth_token` in Bruno's environment settings (stored as secret, not committe
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `base_url` | REST API base URL | `http://localhost:8080` |
-| `grpc_url` | gRPC server URL | `localhost:50051` |
+| `base_url` | Connect API base URL | `http://localhost:8080` |
 | `auth_token` | JWT bearer token (secret) | - |
 
 ### Maintaining the Collection
 
 **IMPORTANT**: When modifying proto files in `proto/kin/v1/`, update the Bruno collection accordingly:
 
-1. **Adding new RPC endpoints**: Create `.bru` files in both `rest/{Service}/` and `grpc/{Service}/`
+1. **Adding new RPC endpoints**: Create `.bru` files in both `connect/{Service}/` and `grpc/{Service}/`
 2. **Removing RPC endpoints**: Delete the corresponding `.bru` files from both folders
-3. **Modifying request/response fields**: Update `body:json` (REST) and `body:grpc-json` (gRPC) sections
-4. **Adding new services**: Create new folders under both `rest/` and `grpc/`
+3. **Modifying request/response fields**: Update `body:json` (Connect) and `body:grpc` (gRPC) sections
+4. **Adding new services**: Create new folders under both `connect/` and `grpc/`
 
 ### Sequence Numbering Convention
 
-The `meta.seq` field controls sort order in Bruno's UI. **Seq must be unique within each service folder**, not globally:
+The `meta.seq` field controls sort order in Bruno's UI. **Seq must be unique within each service folder**:
+- `connect/UserService/` - seq 1-5
+- `connect/CircleService/` - seq 1-13
 - `grpc/UserService/` - seq 1-5
 - `grpc/CircleService/` - seq 1-13
-- `rest/UserService/` - seq 1-5
-- `rest/CircleService/` - seq 1-13
 
 When adding new endpoints, use the next available seq number within the target service folder.
 
 ### Bruno File Templates
 
-**REST Endpoint:**
+**Connect Endpoint (HTTP/JSON):**
 ```bru
 meta {
   name: EndpointName
@@ -385,7 +388,7 @@ meta {
 }
 
 post {
-  url: {{base_url}}/api/v1/path
+  url: {{base_url}}/kin.v1.ServiceName/MethodName
   body: json
   auth: bearer
 }
@@ -410,17 +413,23 @@ meta {
 }
 
 grpc {
-  url: {{grpc_url}}/kin.v1.ServiceName/MethodName
-  body: json
+  url: {{base_url}}
+  method: /kin.v1.ServiceName/MethodName
+  body: grpc
+  auth: bearer
+  methodType: unary
 }
 
 auth:bearer {
   token: {{auth_token}}
 }
 
-body:grpc-json {
-  {
-    "field": "value"
-  }
+body:grpc {
+  name: message 1
+  content: '''
+    {
+      "field": "value"
+    }
+  '''
 }
 ```

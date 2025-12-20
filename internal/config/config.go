@@ -11,7 +11,6 @@ import (
 
 type Config struct {
 	Server     ServerConfig     `mapstructure:"server"`
-	GRPC       GRPCConfig       `mapstructure:"grpc"`
 	Database   DatabaseConfig   `mapstructure:"database"`
 	Redis      RedisConfig      `mapstructure:"redis"`
 	S3         S3Config         `mapstructure:"s3"`
@@ -23,15 +22,11 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	ReadTimeout     time.Duration `mapstructure:"read_timeout"`
-	WriteTimeout    time.Duration `mapstructure:"write_timeout"`
-	ShutdownTimeout time.Duration `mapstructure:"shutdown_timeout"`
-}
-
-type GRPCConfig struct {
-	Port             int  `mapstructure:"port"`
-	EnableReflection bool `mapstructure:"enable_reflection"`
-	GatewayPort      int  `mapstructure:"gateway_port"`
+	Port             int           `mapstructure:"port"`
+	ReadTimeout      time.Duration `mapstructure:"read_timeout"`
+	WriteTimeout     time.Duration `mapstructure:"write_timeout"`
+	ShutdownTimeout  time.Duration `mapstructure:"shutdown_timeout"`
+	EnableReflection bool          `mapstructure:"enable_reflection"` // Enable gRPC reflection (development only)
 }
 
 type DatabaseConfig struct {
@@ -146,9 +141,7 @@ func bindEnvVars(v *viper.Viper) {
 	_ = v.BindEnv("auth.domain", "AUTH0_DOMAIN")
 	_ = v.BindEnv("auth.audience", "AUTH0_AUDIENCE")
 
-	_ = v.BindEnv("grpc.port", "GRPC_PORT")
-	_ = v.BindEnv("grpc.enable_reflection", "GRPC_ENABLE_REFLECTION")
-	_ = v.BindEnv("grpc.gateway_port", "GRPC_GATEWAY_PORT")
+	_ = v.BindEnv("server.port", "PORT")
 
 	_ = v.BindEnv("telemetry.enabled", "OTEL_ENABLED")
 	_ = v.BindEnv("telemetry.otlp_endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT")
@@ -217,18 +210,11 @@ func setDefaults(cfg *Config) {
 		cfg.Telemetry.OTLPEndpoint = "localhost:4317"
 	}
 
-	if cfg.GRPC.Port == 0 {
-		cfg.GRPC.Port = 50051
-	}
-	if cfg.GRPC.GatewayPort == 0 {
-		cfg.GRPC.GatewayPort = 8081
+	if cfg.Server.Port == 0 {
+		cfg.Server.Port = 8080
 	}
 }
 
-func (c *GRPCConfig) Address() string {
+func (c *ServerConfig) Address() string {
 	return fmt.Sprintf(":%d", c.Port)
-}
-
-func (c *GRPCConfig) GatewayAddress() string {
-	return fmt.Sprintf(":%d", c.GatewayPort)
 }

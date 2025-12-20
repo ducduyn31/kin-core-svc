@@ -5,7 +5,7 @@ meta {
 }
 
 grpc {
-  url: {{grpc_url}}
+  url: {{base_url}}
   method: /kin.v1.CircleService/UpdateSharingPreference
   body: grpc
   auth: bearer
@@ -20,13 +20,10 @@ body:grpc {
   name: message 1
   content: '''
     {
-      "circle_id": "your-circle-id-here",
-      "privacy_level": "PRIVACY_LEVEL_STATUS",
+      "circle_id": "00000000-0000-0000-0000-000000000000",
       "share_timezone": true,
       "share_availability": true,
-      "share_location": false,
-      "location_precision": "LOCATION_PRECISION_CITY",
-      "share_activity": true
+      "share_location": false
     }
   '''
 }

@@ -1,0 +1,22 @@
+meta {
+  name: UpdatePreferences
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{base_url}}/kin.v1.UserService/UpdatePreferences
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{auth_token}}
+}
+
+body:json {
+  {
+    "show_online_status": true,
+    "push_notifications": true
+  }
+}

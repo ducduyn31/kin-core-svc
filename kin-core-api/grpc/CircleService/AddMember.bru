@@ -5,7 +5,7 @@ meta {
 }
 
 grpc {
-  url: {{grpc_url}}
+  url: {{base_url}}
   method: /kin.v1.CircleService/AddMember
   body: grpc
   auth: bearer
@@ -20,8 +20,8 @@ body:grpc {
   name: message 1
   content: '''
     {
-      "circle_id": "{{circle_id}}",
-      "user_id": "user-uuid-here",
+      "circle_id": "00000000-0000-0000-0000-000000000000",
+      "user_id": "00000000-0000-0000-0000-000000000001",
       "role": "MEMBER_ROLE_MEMBER"
     }
   '''
