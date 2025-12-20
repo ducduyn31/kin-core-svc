@@ -50,6 +50,12 @@ type Server struct {
 	healthCheckers []HealthChecker
 }
 
+// NewServer creates and configures an HTTP server that exposes Connect RPC handlers for user and circle services
+// and provides /health and /ready HTTP endpoints.
+//
+// The provided ServerConfig controls logger, services, health checkers, build info, and optional features:
+// recovery and authentication interceptors are always applied; OpenTelemetry tracing and gRPC reflection
+// may be enabled via the config. Returns the constructed Server or an error if interceptor setup fails.
 func NewServer(cfg ServerConfig) (*Server, error) {
 	mux := http.NewServeMux()
 

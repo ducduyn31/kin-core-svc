@@ -13,6 +13,8 @@ type RecoveryInterceptor struct {
 	logger *slog.Logger
 }
 
+// NewRecoveryInterceptor constructs a RecoveryInterceptor that recovers from panics in Connect handlers.
+// It uses the provided logger to record panic details (panic value, procedure, and stack trace) and causes panics to be converted into internal server errors.
 func NewRecoveryInterceptor(logger *slog.Logger) *RecoveryInterceptor {
 	return &RecoveryInterceptor{
 		logger: logger,

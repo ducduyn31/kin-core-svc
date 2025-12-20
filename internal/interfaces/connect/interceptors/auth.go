@@ -23,6 +23,8 @@ type AuthInterceptor struct {
 	publicMethods map[string]bool
 }
 
+// NewAuthInterceptor creates an AuthInterceptor that enforces authentication for Connect RPCs using the provided Auth0 validator and user service.
+// The returned interceptor is initialized with an empty set of public methods.
 func NewAuthInterceptor(validator *auth.Auth0Validator, userService *user.Service) *AuthInterceptor {
 	return &AuthInterceptor{
 		validator:     validator,

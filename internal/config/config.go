@@ -126,6 +126,8 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
+// bindEnvVars binds specific environment variables to viper configuration keys.
+// It maps DATABASE_WRITE_URL/DATABASE_READ_URL -> database.write_url/read_url; REDIS_URL -> redis.url; S3_ENDPOINT/S3_REGION/S3_ACCESS_KEY/S3_SECRET_KEY/S3_BUCKET -> s3.endpoint/region/access_key/secret_key/bucket; AUTH0_DOMAIN/AUTH0_AUDIENCE -> auth.domain/audience; PORT -> server.port; and OTEL_ENABLED/OTEL_EXPORTER_OTLP_ENDPOINT -> telemetry.enabled/telemetry.otlp_endpoint.
 func bindEnvVars(v *viper.Viper) {
 	_ = v.BindEnv("database.write_url", "DATABASE_WRITE_URL")
 	_ = v.BindEnv("database.read_url", "DATABASE_READ_URL")
@@ -147,6 +149,9 @@ func bindEnvVars(v *viper.Viper) {
 	_ = v.BindEnv("telemetry.otlp_endpoint", "OTEL_EXPORTER_OTLP_ENDPOINT")
 }
 
+// setDefaults fills zero-valued fields of cfg with sensible defaults for server,
+// database, redis, presence, pagination, authentication, S3, and telemetry
+// configuration, mutating cfg in place.
 func setDefaults(cfg *Config) {
 	if cfg.Server.ReadTimeout == 0 {
 		cfg.Server.ReadTimeout = 30 * time.Second

@@ -20,6 +20,8 @@ type CircleHandler struct {
 	circleService *circle.Service
 }
 
+// NewCircleHandler returns a CircleHandler backed by the provided circle service.
+// The handler delegates circle-related requests to the given circle.Service.
 func NewCircleHandler(circleService *circle.Service) *CircleHandler {
 	return &CircleHandler{
 		circleService: circleService,

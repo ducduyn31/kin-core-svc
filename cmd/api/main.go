@@ -26,6 +26,11 @@ var (
 	BuildTime = "unknown"
 )
 
+// main starts the Kin API server, initializes configuration, logging, telemetry,
+// PostgreSQL and Redis connections, application services and the Connect HTTP
+// server, and handles SIGINT/SIGTERM for graceful shutdown.
+// On fatal initialization failures it logs the error and exits with a non-zero
+// status; on shutdown it attempts a graceful stop using the configured timeout.
 func main() {
 	cfg, err := config.Load()
 	if err != nil {

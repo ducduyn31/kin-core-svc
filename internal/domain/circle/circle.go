@@ -17,6 +17,8 @@ type Circle struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// NewCircle creates a new Circle with the provided name, optional description, and creator ID.
+// The Circle's ID is generated and both CreatedAt and UpdatedAt are set to the current time.
 func NewCircle(name string, description *string, createdBy uuid.UUID) *Circle {
 	now := time.Now()
 	return &Circle{
