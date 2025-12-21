@@ -28,11 +28,6 @@ variable "cluster_certificate_authority_data" {
   type        = string
 }
 
-variable "oidc_provider_arn" {
-  description = "ARN of the OIDC provider for the EKS cluster"
-  type        = string
-}
-
 variable "vpc_id" {
   description = "VPC ID for the ALB Controller"
   type        = string

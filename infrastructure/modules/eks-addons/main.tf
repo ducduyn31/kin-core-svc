@@ -47,40 +47,37 @@ provider "helm" {
   }
 }
 
+# -----------------------------------------------------------------------------
+# Pod Identity Assume Role Policy (shared by all addons)
+# -----------------------------------------------------------------------------
+data "aws_iam_policy_document" "pod_identity_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
+
+# -----------------------------------------------------------------------------
+# External Secrets Operator
+# -----------------------------------------------------------------------------
 resource "kubernetes_namespace" "external_secrets" {
   metadata {
     name = "external-secrets"
   }
 }
 
-data "aws_iam_policy_document" "external_secrets_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
-    }
-
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:sub"
-      values   = ["system:serviceaccount:external-secrets:external-secrets"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-  }
-}
-
 resource "aws_iam_role" "external_secrets" {
   name               = "${var.project}-${var.environment}-external-secrets"
-  assume_role_policy = data.aws_iam_policy_document.external_secrets_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.pod_identity_assume_role.json
 
   tags = {
     Name        = "${var.project}-${var.environment}-external-secrets"
@@ -117,8 +114,13 @@ resource "helm_release" "external_secrets" {
   version    = "1.1.1"
 
   set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.external_secrets.arn
+    name  = "serviceAccount.create"
+    value = "true"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "external-secrets"
   }
 
   set {
@@ -127,11 +129,24 @@ resource "helm_release" "external_secrets" {
   }
 }
 
+resource "aws_eks_pod_identity_association" "external_secrets" {
+  cluster_name    = var.cluster_name
+  namespace       = kubernetes_namespace.external_secrets.metadata[0].name
+  service_account = "external-secrets"
+  role_arn        = aws_iam_role.external_secrets.arn
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-external-secrets-pod-identity"
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
 resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [helm_release.external_secrets]
+  depends_on = [helm_release.external_secrets, aws_eks_pod_identity_association.external_secrets]
 
   manifest = {
-    apiVersion = "external-secrets.io/v1beta1"
+    apiVersion = "external-secrets.io/v1"
     kind       = "ClusterSecretStore"
     metadata = {
       name = "aws-secrets-manager"
@@ -155,44 +170,12 @@ resource "kubernetes_manifest" "cluster_secret_store" {
   }
 }
 
-resource "kubernetes_namespace" "aws_lb_controller" {
-  metadata {
-    name = "kube-system"
-  }
-
-  lifecycle {
-    ignore_changes = [metadata]
-  }
-}
-
-data "aws_iam_policy_document" "alb_controller_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
-    }
-
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:sub"
-      values   = ["system:serviceaccount:kube-system:aws-load-balancer-controller"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-  }
-}
-
+# -----------------------------------------------------------------------------
+# AWS Load Balancer Controller
+# -----------------------------------------------------------------------------
 resource "aws_iam_role" "alb_controller" {
   name               = "${var.project}-${var.environment}-alb-controller"
-  assume_role_policy = data.aws_iam_policy_document.alb_controller_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.pod_identity_assume_role.json
 
   tags = {
     Name        = "${var.project}-${var.environment}-alb-controller"
@@ -281,11 +264,6 @@ resource "helm_release" "alb_controller" {
   }
 
   set {
-    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.alb_controller.arn
-  }
-
-  set {
     name  = "vpcId"
     value = var.vpc_id
   }
@@ -296,40 +274,31 @@ resource "helm_release" "alb_controller" {
   }
 }
 
+resource "aws_eks_pod_identity_association" "alb_controller" {
+  cluster_name    = var.cluster_name
+  namespace       = "kube-system"
+  service_account = "aws-load-balancer-controller"
+  role_arn        = aws_iam_role.alb_controller.arn
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-alb-controller-pod-identity"
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# -----------------------------------------------------------------------------
+# OpenTelemetry Collector
+# -----------------------------------------------------------------------------
 resource "kubernetes_namespace" "otel" {
   metadata {
     name = "otel"
   }
 }
 
-data "aws_iam_policy_document" "otel_assume_role" {
-  statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Federated"
-      identifiers = [var.oidc_provider_arn]
-    }
-
-    actions = ["sts:AssumeRoleWithWebIdentity"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:sub"
-      values   = ["system:serviceaccount:otel:otel-collector"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "${replace(var.oidc_provider_arn, "/^(.*provider/)/", "")}:aud"
-      values   = ["sts.amazonaws.com"]
-    }
-  }
-}
-
 resource "aws_iam_role" "otel" {
   name               = "${var.project}-${var.environment}-otel-collector"
-  assume_role_policy = data.aws_iam_policy_document.otel_assume_role.json
+  assume_role_policy = data.aws_iam_policy_document.pod_identity_assume_role.json
 
   tags = {
     Name        = "${var.project}-${var.environment}-otel-collector"
@@ -356,8 +325,6 @@ resource "helm_release" "otel_collector" {
     serviceAccount:
       create: true
       name: otel-collector
-      annotations:
-        eks.amazonaws.com/role-arn: ${aws_iam_role.otel.arn}
 
     config:
       receivers:
@@ -398,4 +365,17 @@ resource "helm_release" "otel_collector" {
         protocol: TCP
   EOT
   ]
+}
+
+resource "aws_eks_pod_identity_association" "otel" {
+  cluster_name    = var.cluster_name
+  namespace       = kubernetes_namespace.otel.metadata[0].name
+  service_account = "otel-collector"
+  role_arn        = aws_iam_role.otel.arn
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-otel-pod-identity"
+    Environment = var.environment
+    Project     = var.project
+  }
 }
