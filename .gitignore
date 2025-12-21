@@ -58,3 +58,16 @@ dist/
 
 # Generated files (Bob models)
 internal/infrastructure/postgres/models/
+
+# OpenTofu / Terraform
+*.tfvars
+!*.tfvars.example
+*.tfstate
+*.tfstate.*
+.terraform/
+.terragrunt-cache/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
