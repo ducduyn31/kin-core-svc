@@ -231,6 +231,16 @@ resource "aws_organizations_policy_attachment" "infra_deny_leave" {
   target_id = aws_organizations_organizational_unit.infrastructure.id
 }
 
+resource "aws_organizations_policy_attachment" "infra_deny_root" {
+  policy_id = aws_organizations_policy.deny_root_user.id
+  target_id = aws_organizations_organizational_unit.infrastructure.id
+}
+
+resource "aws_organizations_policy_attachment" "infra_require_imdsv2" {
+  policy_id = aws_organizations_policy.require_imdsv2.id
+  target_id = aws_organizations_organizational_unit.infrastructure.id
+}
+
 resource "aws_organizations_policy_attachment" "infra_deny_regions" {
   policy_id = aws_organizations_policy.deny_regions.id
   target_id = aws_organizations_organizational_unit.infrastructure.id
