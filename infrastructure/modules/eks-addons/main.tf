@@ -363,7 +363,7 @@ resource "helm_release" "otel_collector" {
   namespace  = kubernetes_namespace.otel.metadata[0].name
   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
   chart      = "opentelemetry-collector"
-  version    = "0.125.0"
+  version    = "0.142.0"
 
   values = [<<-EOT
     mode: daemonset
@@ -402,7 +402,6 @@ resource "helm_release" "otel_collector" {
         enabled: true
         containerPort: 4317
         servicePort: 4317
-        hostPort: 4317
         protocol: TCP
       otlp-http:
         enabled: true
