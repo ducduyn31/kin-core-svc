@@ -184,52 +184,98 @@ resource "aws_iam_role" "alb_controller" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "alb_controller" {
-  role       = aws_iam_role.alb_controller.name
-  policy_arn = "arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess"
-}
-
 data "aws_iam_policy_document" "alb_controller" {
+  # Elastic Load Balancing permissions (scoped per official AWS LB Controller policy)
   statement {
     effect = "Allow"
     actions = [
-      "ec2:DescribeAvailabilityZones",
-      "ec2:DescribeSecurityGroups",
-      "ec2:DescribeSubnets",
-      "ec2:DescribeVpcs",
-      "ec2:DescribeTags",
-      "ec2:DescribeInstances",
-      "ec2:DescribeNetworkInterfaces",
-      "ec2:DescribeAccountAttributes",
-      "ec2:DescribeInternetGateways",
+      "elasticloadbalancing:AddListenerCertificates",
+      "elasticloadbalancing:AddTags",
+      "elasticloadbalancing:CreateListener",
+      "elasticloadbalancing:CreateLoadBalancer",
+      "elasticloadbalancing:CreateRule",
+      "elasticloadbalancing:CreateTargetGroup",
+      "elasticloadbalancing:DeleteListener",
+      "elasticloadbalancing:DeleteLoadBalancer",
+      "elasticloadbalancing:DeleteRule",
+      "elasticloadbalancing:DeleteTargetGroup",
+      "elasticloadbalancing:DeregisterTargets",
+      "elasticloadbalancing:DescribeCapacityReservation",
+      "elasticloadbalancing:DescribeListenerAttributes",
+      "elasticloadbalancing:DescribeListenerCertificates",
+      "elasticloadbalancing:DescribeListeners",
+      "elasticloadbalancing:DescribeLoadBalancerAttributes",
+      "elasticloadbalancing:DescribeLoadBalancers",
+      "elasticloadbalancing:DescribeRules",
+      "elasticloadbalancing:DescribeSSLPolicies",
+      "elasticloadbalancing:DescribeTags",
+      "elasticloadbalancing:DescribeTargetGroupAttributes",
+      "elasticloadbalancing:DescribeTargetGroups",
+      "elasticloadbalancing:DescribeTargetHealth",
+      "elasticloadbalancing:DescribeTrustStores",
+      "elasticloadbalancing:ModifyCapacityReservation",
+      "elasticloadbalancing:ModifyIpPools",
+      "elasticloadbalancing:ModifyListener",
+      "elasticloadbalancing:ModifyListenerAttributes",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
+      "elasticloadbalancing:ModifyRule",
+      "elasticloadbalancing:ModifyTargetGroup",
+      "elasticloadbalancing:ModifyTargetGroupAttributes",
+      "elasticloadbalancing:RegisterTargets",
+      "elasticloadbalancing:RemoveListenerCertificates",
+      "elasticloadbalancing:RemoveTags",
+      "elasticloadbalancing:SetIpAddressType",
+      "elasticloadbalancing:SetRulePriorities",
+      "elasticloadbalancing:SetSecurityGroups",
+      "elasticloadbalancing:SetSubnets",
+      "elasticloadbalancing:SetWebAcl"
+    ]
+    resources = ["*"]
+  }
+
+  # EC2 permissions for ALB Controller
+  statement {
+    effect = "Allow"
+    actions = [
+      "ec2:AuthorizeSecurityGroupIngress",
       "ec2:CreateSecurityGroup",
       "ec2:CreateTags",
+      "ec2:DeleteSecurityGroup",
       "ec2:DeleteTags",
-      "ec2:AuthorizeSecurityGroupIngress",
-      "ec2:RevokeSecurityGroupIngress",
-      "ec2:DeleteSecurityGroup"
+      "ec2:DescribeAccountAttributes",
+      "ec2:DescribeAvailabilityZones",
+      "ec2:DescribeInstances",
+      "ec2:DescribeInternetGateways",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeTags",
+      "ec2:DescribeVpcs",
+      "ec2:RevokeSecurityGroupIngress"
     ]
     resources = ["*"]
   }
 
+  # WAFv2 permissions
   statement {
     effect = "Allow"
     actions = [
-      "wafv2:GetWebACL",
-      "wafv2:GetWebACLForResource",
       "wafv2:AssociateWebACL",
-      "wafv2:DisassociateWebACL"
+      "wafv2:DisassociateWebACL",
+      "wafv2:GetWebACL",
+      "wafv2:GetWebACLForResource"
     ]
     resources = ["*"]
   }
 
+  # Shield permissions
   statement {
     effect = "Allow"
     actions = [
-      "shield:GetSubscriptionState",
-      "shield:DescribeProtection",
       "shield:CreateProtection",
-      "shield:DeleteProtection"
+      "shield:DeleteProtection",
+      "shield:DescribeProtection",
+      "shield:GetSubscriptionState"
     ]
     resources = ["*"]
   }
