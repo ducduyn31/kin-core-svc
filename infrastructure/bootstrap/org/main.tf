@@ -198,12 +198,6 @@ resource "aws_organizations_policy" "deny_regions" {
           StringNotEquals = {
             "aws:RequestedRegion" = var.allowed_regions
           }
-          # Exclude global services
-          "ForAllValues:StringNotLike" = {
-            "aws:PrincipalArn" = [
-              "arn:aws:iam::*:role/OrganizationAccountAccessRole"
-            ]
-          }
         }
       }
     ]
