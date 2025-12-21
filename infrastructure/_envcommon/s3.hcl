@@ -9,6 +9,7 @@ locals {
   environment = local.env_vars.locals.environment
   project     = local.env_vars.locals.project
   account_id  = local.account_vars.locals.account_id
+  cors_origin = local.env_vars.locals.cors_origin
 
   bucket_name = "${local.project}-media-${local.environment}-${local.account_id}"
 }
@@ -41,7 +42,7 @@ inputs = {
     {
       allowed_headers = ["*"]
       allowed_methods = ["GET", "PUT", "POST"]
-      allowed_origins = ["https://kin.coffeewithegg.com"]
+      allowed_origins = [local.cors_origin]
       expose_headers  = ["ETag"]
       max_age_seconds = 3600
     }

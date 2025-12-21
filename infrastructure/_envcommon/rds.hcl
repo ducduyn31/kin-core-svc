@@ -32,7 +32,16 @@ inputs = {
   username = "postgres"
   port     = 5432
 
-  # Use AWS Secrets Manager for password management
+  # Network security
+  # Note: db_subnet_group_name and vpc_security_group_ids must be provided
+  # by environment-specific config (e.g., infrastructure/live/production/rds/terragrunt.hcl)
+  publicly_accessible = false
+
+  # IAM database authentication (used with EKS Pod Identity)
+  # App generates short-lived tokens instead of using passwords
+  iam_database_authentication_enabled = true
+
+  # Keep Secrets Manager password for admin/migration tasks
   manage_master_user_password = true
 
   # Multi-AZ - disabled for cost, enable for production HA

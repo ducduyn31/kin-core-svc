@@ -23,11 +23,11 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.82"
+      version = "~> 6.26"
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "~> 2.35"
+      version = "~> 3.0"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -58,10 +58,10 @@ remote_state {
   backend = "s3"
   config = {
     encrypt        = true
-    bucket         = "kin-tofu-state-${local.account_id}"
+    bucket         = "kin-${local.environment}-tfstate"
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = local.aws_region
-    dynamodb_table = "kin-tofu-locks"
+    dynamodb_table = "kin-${local.environment}-tf-locks"
   }
   generate = {
     path      = "backend.tf"
