@@ -1,0 +1,9 @@
+# Copy this file to terraform.tfvars and fill in the values
+# cp terraform.tfvars.example terraform.tfvars
+
+# AWS account IDs that can pull images from ECR
+environment_account_ids = {
+  production = "123456789012"
+  # staging  = "234567890123"
+  # dev      = "345678901234"
+}
