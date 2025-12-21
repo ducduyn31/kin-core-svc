@@ -45,6 +45,15 @@
             grpcurl # gRPC testing
             docker-compose
 
+            # Infrastructure tools
+            opentofu
+            terragrunt
+            awscli2
+            kubectl
+            kubernetes-helm
+            argocd
+            k9s # Kubernetes TUI
+
             # Utilities
             git
             jq
@@ -58,9 +67,18 @@
 
             echo "Kin Core Service Development Environment"
             echo ""
-            echo "Go:   $(go version | cut -d' ' -f3)"
-            echo "Buf:  $(buf --version)"
-            echo "Task: $(task --version)"
+            echo "=== Application Tools ==="
+            echo "Go:         $(go version | cut -d' ' -f3)"
+            echo "Buf:        $(buf --version)"
+            echo "Task:       $(task --version)"
+            echo ""
+            echo "=== Infrastructure Tools ==="
+            echo "OpenTofu:   $(tofu version -json | jq -r '.terraform_version')"
+            echo "Terragrunt: $(terragrunt --version | head -1 | cut -d' ' -f3)"
+            echo "AWS CLI:    $(aws --version | cut -d' ' -f1 | cut -d'/' -f2)"
+            echo "kubectl:    $(kubectl version --client -o json 2>/dev/null | jq -r '.clientVersion.gitVersion')"
+            echo "Helm:       $(helm version --short | cut -d'+' -f1)"
+            echo "ArgoCD:     $(argocd version --client --short 2>/dev/null || echo 'v2.x')"
             echo ""
             echo "Run 'task' to see available commands"
           '';
