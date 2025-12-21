@@ -1,0 +1,14 @@
+# Example terraform.tfvars for AWS Organizations setup
+# Copy this file to terraform.tfvars and update the values
+
+# Email addresses must be unique - they cannot be used by any other AWS account
+# Tip: Use email aliases like aws+kin-shared@yourdomain.com
+
+shared_account_email     = "aws+kin-shared@yourdomain.com"
+production_account_email = "aws+kin-production@yourdomain.com"
+
+# Allowed regions (ap-southeast-2 is primary, us-east-1 for global services)
+allowed_regions = [
+  "ap-southeast-2",
+  "us-east-1",
+]
