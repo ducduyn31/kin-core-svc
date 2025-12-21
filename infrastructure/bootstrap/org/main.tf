@@ -8,6 +8,7 @@
 # - Shared Resources account
 # - Kin Production account
 # - Service Control Policies (SCPs)
+# - State buckets and lock tables for member accounts
 #
 # Prerequisites (ClickOps - must be created manually first):
 # 1. S3 bucket: kin-mgmt-tfstate (versioning enabled, encrypted)
@@ -93,49 +94,6 @@ resource "aws_organizations_organizational_unit" "workloads_production" {
 }
 
 # -----------------------------------------------------------------------------
-# Member Accounts
-# -----------------------------------------------------------------------------
-
-# Shared Resources Account
-# Used for: ECR, shared networking, DNS, etc.
-resource "aws_organizations_account" "shared" {
-  name      = "kin-shared"
-  email     = var.shared_account_email
-  parent_id = aws_organizations_organizational_unit.infrastructure.id
-
-  role_name = "OrganizationAccountAccessRole"
-
-  # Prevent accidental deletion
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    Name        = "Kin Shared Resources"
-    Environment = "shared"
-  }
-}
-
-# Kin Production Account
-resource "aws_organizations_account" "kin_production" {
-  name      = "kin-production"
-  email     = var.production_account_email
-  parent_id = aws_organizations_organizational_unit.workloads_production.id
-
-  role_name = "OrganizationAccountAccessRole"
-
-  # Prevent accidental deletion
-  lifecycle {
-    prevent_destroy = true
-  }
-
-  tags = {
-    Name        = "Kin Production"
-    Environment = "production"
-  }
-}
-
-# -----------------------------------------------------------------------------
 # Service Control Policies
 # -----------------------------------------------------------------------------
 
@@ -149,10 +107,10 @@ resource "aws_organizations_policy" "deny_leave_org" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "DenyLeaveOrg"
-        Effect    = "Deny"
-        Action    = "organizations:LeaveOrganization"
-        Resource  = "*"
+        Sid      = "DenyLeaveOrg"
+        Effect   = "Deny"
+        Action   = "organizations:LeaveOrganization"
+        Resource = "*"
       }
     ]
   })
@@ -208,10 +166,10 @@ resource "aws_organizations_policy" "require_imdsv2" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "RequireIMDSv2"
-        Effect    = "Deny"
-        Action    = "ec2:RunInstances"
-        Resource  = "arn:aws:ec2:*:*:instance/*"
+        Sid      = "RequireIMDSv2"
+        Effect   = "Deny"
+        Action   = "ec2:RunInstances"
+        Resource = "arn:aws:ec2:*:*:instance/*"
         Condition = {
           StringNotEquals = {
             "ec2:MetadataHttpTokens" = "required"

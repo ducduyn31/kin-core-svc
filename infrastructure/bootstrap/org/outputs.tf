@@ -58,3 +58,24 @@ output "production_account_role_arn" {
   description = "Role ARN to assume in Production account"
   value       = "arn:aws:iam::${aws_organizations_account.kin_production.id}:role/OrganizationAccountAccessRole"
 }
+
+# State bucket and lock table outputs
+output "shared_tfstate_bucket" {
+  description = "S3 bucket for Shared account OpenTofu state"
+  value       = aws_s3_bucket.shared_tfstate.id
+}
+
+output "shared_tf_locks_table" {
+  description = "DynamoDB table for Shared account OpenTofu state locking"
+  value       = aws_dynamodb_table.shared_tf_locks.id
+}
+
+output "production_tfstate_bucket" {
+  description = "S3 bucket for Production account OpenTofu state"
+  value       = aws_s3_bucket.production_tfstate.id
+}
+
+output "production_tf_locks_table" {
+  description = "DynamoDB table for Production account OpenTofu state locking"
+  value       = aws_dynamodb_table.production_tf_locks.id
+}
