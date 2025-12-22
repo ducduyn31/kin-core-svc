@@ -29,7 +29,7 @@ graph TD
 ```
 infrastructure/
 ├── README.md
-├── terragrunt.hcl              # Root Terragrunt config
+├── root.hcl                    # Root Terragrunt config
 ├── bootstrap/
 │   └── org/                    # AWS Organizations (run from management account)
 ├── _envcommon/                 # Shared module configs
@@ -193,7 +193,21 @@ locals {
 
 ### Step 4: Deploy Production Infrastructure
 
-From the production account:
+Assume role into the **production account**:
+
+```bash
+# Option 1: Use AWS CLI profile (recommended)
+export AWS_PROFILE=kin-production
+
+# Option 2: Assume role directly
+eval $(aws sts assume-role \
+  --role-arn arn:aws:iam::PRODUCTION_ACCOUNT_ID:role/OrganizationAccountAccessRole \
+  --role-session-name production \
+  --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+  --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1" AWS_SECRET_ACCESS_KEY="$2" AWS_SESSION_TOKEN="$3}')
+```
+
+Deploy production infrastructure:
 
 ```bash
 cd infrastructure/live/production
