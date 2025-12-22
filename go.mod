@@ -5,7 +5,7 @@ go 1.25.5
 require (
 	connectrpc.com/connect v1.19.1
 	connectrpc.com/grpcreflect v1.3.0
-	connectrpc.com/otelconnect v0.7.1
+	connectrpc.com/otelconnect v0.8.0
 	github.com/aarondl/opt v0.0.0-20250607033636-982744e1bd65
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.6
