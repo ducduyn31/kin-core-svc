@@ -1,26 +1,26 @@
-output "cluster_id" {
-  description = "ElastiCache cluster ID"
-  value       = module.elasticache.cluster_id
+output "replication_group_id" {
+  description = "ElastiCache replication group ID"
+  value       = module.elasticache.replication_group_id
 }
 
-output "cluster_arn" {
-  description = "ElastiCache cluster ARN"
-  value       = module.elasticache.cluster_arn
+output "replication_group_arn" {
+  description = "ElastiCache replication group ARN"
+  value       = module.elasticache.replication_group_arn
 }
 
-output "cluster_cache_nodes" {
-  description = "List of cache node objects including address and port"
-  value       = module.elasticache.cluster_cache_nodes
+output "primary_endpoint_address" {
+  description = "Primary endpoint address for the replication group"
+  value       = module.elasticache.replication_group_primary_endpoint_address
 }
 
-output "cluster_address" {
-  description = "DNS name of the cache cluster"
-  value       = module.elasticache.cluster_address
+output "reader_endpoint_address" {
+  description = "Reader endpoint address for the replication group"
+  value       = module.elasticache.replication_group_reader_endpoint_address
 }
 
-output "cluster_configuration_endpoint" {
-  description = "Configuration endpoint address"
-  value       = module.elasticache.cluster_configuration_endpoint
+output "port" {
+  description = "ElastiCache port"
+  value       = 6379
 }
 
 output "auth_token_secret_arn" {

@@ -47,23 +47,25 @@ module "elasticache" {
   source  = "terraform-aws-modules/elasticache/aws"
   version = "1.10.3"
 
-  cluster_id = var.cluster_id
+  # Use replication group (module default) - more flexible than cluster
+  replication_group_id = var.cluster_id
 
   # Engine configuration
   engine         = var.engine
   engine_version = var.engine_version
   node_type      = var.node_type
 
-  # Cluster configuration
-  num_cache_nodes = var.num_cache_nodes
+  # Replication group configuration
+  num_cache_clusters = var.num_cache_nodes
 
   # Parameter group
   parameter_group_family = var.parameter_group_family
   parameters             = var.parameters
 
   # Network
-  subnet_ids         = var.subnet_ids
-  security_group_ids = var.security_group_ids
+  subnet_ids            = var.subnet_ids
+  security_group_ids    = var.security_group_ids
+  create_security_group = false  # Use provided security groups, don't create new one
 
   # Security - enable auth token with transit encryption
   at_rest_encryption_enabled = var.at_rest_encryption_enabled
