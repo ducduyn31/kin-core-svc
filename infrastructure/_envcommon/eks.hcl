@@ -14,7 +14,7 @@ locals {
 }
 
 inputs = {
-  cluster_name    = local.cluster_name
+  name            = local.cluster_name
   cluster_version = "1.34"
 
   # Cluster endpoint access
@@ -42,8 +42,9 @@ inputs = {
   # Managed node groups
   eks_managed_node_groups = {
     default = {
-      name           = "default"
-      instance_types = ["t4g.medium"]
+      name               = "default"
+      instance_types     = ["t4g.medium"]
+      kubernetes_version = "1.34"
 
       min_size     = 2
       max_size     = 5
@@ -51,6 +52,14 @@ inputs = {
 
       # Use latest EKS optimized AMI
       ami_type = "AL2023_ARM_64_STANDARD"
+
+      # IMDS configuration - hop limit must be 2 for containers
+      metadata_options = {
+        http_endpoint               = "enabled"
+        http_tokens                 = "required"
+        http_put_response_hop_limit = 2
+        instance_metadata_tags      = "disabled"
+      }
 
       # We will setup with Prometheus and Grafana for monitoring later
       enable_monitoring = false

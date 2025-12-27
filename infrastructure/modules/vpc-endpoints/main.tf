@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.26"
+      version = "~> 6.27"
     }
   }
 }
@@ -56,6 +56,24 @@ resource "aws_vpc_endpoint" "s3" {
 
   tags = {
     Name        = "${var.project}-${var.environment}-s3"
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
+# -----------------------------------------------------------------------------
+# EC2 Endpoint (Required for EKS nodes)
+# -----------------------------------------------------------------------------
+resource "aws_vpc_endpoint" "ec2" {
+  vpc_id              = var.vpc_id
+  service_name        = "com.amazonaws.${local.region}.ec2"
+  vpc_endpoint_type   = "Interface"
+  subnet_ids          = var.private_subnet_ids
+  security_group_ids  = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-ec2"
     Environment = var.environment
     Project     = var.project
   }

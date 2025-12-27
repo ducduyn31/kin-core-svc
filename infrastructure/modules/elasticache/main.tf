@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 6.26"
+      version = "~> 6.27"
     }
     random = {
       source  = "hashicorp/random"
@@ -34,10 +34,6 @@ resource "aws_secretsmanager_secret" "auth_token" {
 resource "aws_secretsmanager_secret_version" "auth_token" {
   secret_id     = aws_secretsmanager_secret.auth_token.id
   secret_string = random_password.auth_token.result
-
-  lifecycle {
-    ignore_changes = [secret_string]
-  }
 }
 
 # -----------------------------------------------------------------------------
