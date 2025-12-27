@@ -23,74 +23,42 @@ inputs = {
 
   enable_irsa = false
 
-  # EKS Managed Add-ons
-  cluster_addons = {
-    coredns = {
-      most_recent = true
-    }
+  # Only DaemonSet addons here - they must exist before nodes join
+  # coredns is created in eks-node-groups module (needs nodes to schedule)
+  addons = {
     kube-proxy = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
     vpc-cni = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
     eks-pod-identity-agent = {
-      most_recent = true
+      most_recent    = true
+      before_compute = true
     }
   }
 
-  # Managed node groups
-  eks_managed_node_groups = {
-    default = {
-      name               = "default"
-      instance_types     = ["t4g.medium"]
-      kubernetes_version = "1.34"
-
-      min_size     = 2
-      max_size     = 5
-      desired_size = 2
-
-      # Use latest EKS optimized AMI
-      ami_type = "AL2023_ARM_64_STANDARD"
-
-      # IMDS configuration - hop limit must be 2 for containers
-      metadata_options = {
-        http_endpoint               = "enabled"
-        http_tokens                 = "required"
-        http_put_response_hop_limit = 2
-        instance_metadata_tags      = "disabled"
-      }
-
-      # We will setup with Prometheus and Grafana for monitoring later
-      enable_monitoring = false
-
-      # Disk configuration
-      block_device_mappings = {
-        xvda = {
-          device_name = "/dev/xvda"
-          ebs = {
-            volume_size           = 50
-            volume_type           = "gp3"
-            encrypted             = true
-            delete_on_termination = true
-          }
-        }
-      }
-
-      labels = {
-        Environment = local.environment
-        NodeGroup   = "default"
-      }
-
-      tags = {
-        Environment = local.environment
-        Project     = local.project
-      }
-    }
-  }
+  eks_managed_node_groups = {}
 
   # Cluster access
   enable_cluster_creator_admin_permissions = true
+
+  # Access entries for additional roles
+  access_entries = {
+    deployment = {
+      principal_arn = "arn:aws:iam::${local.account_id}:role/${local.project}-${local.environment}-deployment"
+      policy_associations = {
+        cluster_admin = {
+          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = {
+            type = "cluster"
+          }
+        }
+      }
+    }
+  }
 
   # Encryption
   cluster_encryption_config = {

@@ -33,10 +33,30 @@ infrastructure/
 ├── bootstrap/
 │   └── org/                    # AWS Organizations (run from management account)
 ├── _envcommon/                 # Shared module configs
-├── modules/                    # Custom OpenTofu modules
+│   ├── eks.hcl                 # EKS cluster + core addons
+│   ├── eks-node-groups.hcl     # EKS managed node groups
+│   ├── pod-identity.hcl        # Pod identity for kin-core-svc
+│   ├── rds.hcl                 # PostgreSQL database
+│   ├── vpc.hcl                 # VPC networking
+│   └── ...
+├── modules/
+│   ├── eks-addons/             # Helm charts (External Secrets, ALB Controller, OTEL)
+│   ├── pod-identity/           # Pod identity configuration
+│   └── iam-roles/              # IAM roles module (assumable roles)
 └── live/
     ├── shared/                 # Shared account (ECR, GitHub OIDC) - plain OpenTofu
     └── production/             # Production environment - Terragrunt
+        ├── iam-roles/          # IAM roles (deployment, CI, etc.)
+        ├── vpc/
+        ├── vpc-endpoints/
+        ├── eks/                # EKS cluster + core addons (vpc-cni, kube-proxy, coredns)
+        ├── eks-node-groups/    # Managed node groups (depends on eks)
+        ├── eks-addons/         # Helm charts (depends on eks-node-groups)
+        ├── pod-identity/
+        ├── rds/
+        ├── elasticache/
+        ├── s3/
+        └── ...
 ```
 
 ## Prerequisites
@@ -247,12 +267,65 @@ aws --profile kin-production eks update-kubeconfig --name kin-production
 2. Shared account (live/shared)            → ECR, GitHub OIDC
 3. Production VPC                          → Network infrastructure
 4. Production VPC Endpoints                → Private AWS service connectivity
-5. Production RDS, ElastiCache, S3         → Data layer (parallel)
-6. Production Secrets                      → Secrets Manager
-7. Production EKS                          → Kubernetes cluster
-8. Production Pod Identity                 → IAM roles + Pod Identity associations
-9. Production EKS-addons                   → ESO, ALB Controller, OTEL
-10. Production ArgoCD                      → GitOps (auto-deploys app)
+5. Production IAM Roles                    → Deployment role, CI roles
+6. Production RDS, ElastiCache, S3         → Data layer (parallel)
+7. Production Secrets                      → Secrets Manager
+8. Production EKS                          → Kubernetes cluster + core addons
+9. Production EKS Node Groups              → Managed node groups (after addons ready)
+10. Production Pod Identity                → IAM roles + Pod Identity associations
+11. Production EKS-addons                  → ESO, ALB Controller, OTEL (Helm charts)
+12. Production ArgoCD                      → GitOps (auto-deploys app)
+```
+
+### EKS Module Dependencies
+
+The EKS stack is split into three modules to ensure proper ordering:
+
+```
+eks (cluster + addons) → eks-node-groups → eks-addons (Helm)
+```
+
+| Module | Contents | Purpose |
+|--------|----------|---------|
+| `eks` | Cluster + core addons (vpc-cni, kube-proxy, coredns, eks-pod-identity-agent) | Addons must be active before nodes join |
+| `eks-node-groups` | Managed node groups | Waits for addons via Terragrunt dependency |
+| `eks-addons` | Helm charts (External Secrets, ALB Controller, OTEL) | Requires healthy nodes to schedule pods |
+
+This separation prevents the race condition where nodes try to join before the vpc-cni addon is ready, which causes "NetworkPluginNotReady" errors.
+
+### EKS Node Access
+
+Nodes have SSM Agent installed for secure shell access (no SSH keys required):
+
+```bash
+# List managed instances
+aws ssm describe-instance-information --region ap-southeast-2
+
+# Connect to a node
+aws ssm start-session --target <instance-id> --region ap-southeast-2
+```
+
+### Debugging EKS Node Issues
+
+```bash
+# Check node group status
+aws eks describe-nodegroup \
+  --cluster-name kin-production \
+  --nodegroup-name default \
+  --region ap-southeast-2
+
+# Check addon status
+aws eks list-addons --cluster-name kin-production --region ap-southeast-2
+aws eks describe-addon --cluster-name kin-production --addon-name vpc-cni --region ap-southeast-2
+
+# Get EC2 console output (boot logs)
+aws ec2 get-console-output --instance-id <instance-id> --region ap-southeast-2
+
+# On node via SSM: check kubelet
+sudo journalctl -u kubelet -n 100 --no-pager
+
+# On node via SSM: check CNI logs
+sudo cat /var/log/aws-routed-eni/ipamd.log | tail -100
 ```
 
 ## Security
@@ -263,6 +336,29 @@ aws --profile kin-production eks update-kubeconfig --name kin-production
 - **Pod Identity**: Pods use EKS Pod Identity for AWS access (replaces IRSA)
 - **RDS IAM Auth**: Database authentication via IAM tokens (no passwords)
 - **Secrets**: AWS Secrets Manager for admin credentials
+
+### IAM Roles
+
+Environment-specific IAM roles are defined in `live/{env}/iam-roles/`. These roles can be assumed by SSO users for specific tasks.
+
+**Production Roles:**
+
+| Role | Purpose | Assumed By |
+|------|---------|------------|
+| `kin-production-deployment` | Infrastructure provisioning and EKS deployments | AdministratorAccess SSO users |
+
+The deployment role has:
+- **PowerUserAccess** - Full access to AWS services
+- **Scoped IAM** - Manage roles, policies, instance profiles, OIDC providers (excludes users/groups)
+
+**Assuming the deployment role:**
+
+```bash
+# After logging in via SSO with AdministratorAccess
+aws sts assume-role \
+  --role-arn arn:aws:iam::646044945002:role/kin-production-deployment \
+  --role-session-name deployment
+```
 
 ### RDS IAM Authentication
 

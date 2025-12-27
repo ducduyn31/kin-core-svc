@@ -21,6 +21,15 @@ dependency "eks" {
   }
 }
 
+# Ensure nodes are ready before installing Helm charts
+dependency "eks_node_groups" {
+  config_path = "../eks-node-groups"
+
+  mock_outputs = {
+    node_group_arn = "arn:aws:eks:ap-southeast-2:123456789012:nodegroup/mock"
+  }
+}
+
 dependency "vpc" {
   config_path = "../vpc"
 

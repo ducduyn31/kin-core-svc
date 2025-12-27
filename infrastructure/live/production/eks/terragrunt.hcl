@@ -26,6 +26,22 @@ dependency "vpc_endpoints" {
   }
 }
 
+dependency "iam_roles" {
+  config_path = "../iam-roles"
+
+  mock_outputs = {
+    roles = {
+      "kin-production-deployment" = {
+        arn  = "arn:aws:iam::123456789012:role/kin-production-deployment"
+        name = "kin-production-deployment"
+      }
+    }
+    role_arns = {
+      "kin-production-deployment" = "arn:aws:iam::123456789012:role/kin-production-deployment"
+    }
+  }
+}
+
 # Additional inputs specific to this environment
 inputs = {
   # Network configuration

@@ -23,6 +23,23 @@ locals {
   account_id = data.aws_caller_identity.current.account_id
 }
 
+# -----------------------------------------------------------------------------
+# CoreDNS Addon (needs nodes to schedule pods)
+# -----------------------------------------------------------------------------
+resource "aws_eks_addon" "coredns" {
+  cluster_name = var.cluster_name
+  addon_name   = "coredns"
+
+  resolve_conflicts_on_create = "OVERWRITE"
+  resolve_conflicts_on_update = "OVERWRITE"
+
+  tags = {
+    Name        = "${var.project}-${var.environment}-coredns"
+    Environment = var.environment
+    Project     = var.project
+  }
+}
+
 provider "kubernetes" {
   host                   = var.cluster_endpoint
   cluster_ca_certificate = base64decode(var.cluster_certificate_authority_data)
