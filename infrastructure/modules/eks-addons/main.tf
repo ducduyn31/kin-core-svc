@@ -128,7 +128,7 @@ resource "helm_release" "external_secrets" {
   namespace  = kubernetes_namespace.external_secrets.metadata[0].name
   repository = "https://charts.external-secrets.io"
   chart      = "external-secrets"
-  version    = "1.1.1"
+  version    = "1.2.0"
 
   set {
     name  = "serviceAccount.create"
