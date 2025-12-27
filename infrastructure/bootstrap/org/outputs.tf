@@ -79,3 +79,29 @@ output "production_tf_locks_table" {
   description = "DynamoDB table for Production account OpenTofu state locking"
   value       = aws_dynamodb_table.production_tf_locks.id
 }
+
+# Identity Center outputs
+output "identity_center_instance_arn" {
+  description = "IAM Identity Center instance ARN"
+  value       = local.sso_instance_arn
+}
+
+output "identity_store_id" {
+  description = "IAM Identity Store ID"
+  value       = local.identity_store_id
+}
+
+output "admins_group_id" {
+  description = "Admins group ID in Identity Store"
+  value       = aws_identitystore_group.admins.group_id
+}
+
+output "permission_set_administrator_access_arn" {
+  description = "AdministratorAccess permission set ARN"
+  value       = aws_ssoadmin_permission_set.administrator_access.arn
+}
+
+output "permission_set_view_only_access_arn" {
+  description = "ViewOnlyAccess permission set ARN"
+  value       = aws_ssoadmin_permission_set.view_only_access.arn
+}

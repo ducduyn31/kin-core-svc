@@ -153,7 +153,7 @@ aws configure --profile kin-shared
 
 # Option 2: Assume role directly
 eval $(aws sts assume-role \
-  --role-arn arn:aws:iam::SHARED_ACCOUNT_ID:role/OrganizationAccountAccessRole \
+  --role-arn arn:aws:iam::216302319215:role/OrganizationAccountAccessRole \
   --role-session-name shared \
   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
   --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1" AWS_SECRET_ACCESS_KEY="$2" AWS_SESSION_TOKEN="$3}')
@@ -180,18 +180,7 @@ This creates:
 
 Note the `github_actions_role_arn` and `ecr_repository_urls` from the output.
 
-### Step 3: Configure Account Settings
-
-Update `live/production/account.hcl` with your production account ID:
-
-```hcl
-locals {
-  account_id   = "YOUR_PRODUCTION_ACCOUNT_ID"
-  account_name = "kin-production"
-}
-```
-
-### Step 4: Deploy Production Infrastructure
+### Step 3: Deploy Production Infrastructure
 
 Assume role into the **production account**:
 
@@ -201,7 +190,7 @@ export AWS_PROFILE=kin-production
 
 # Option 2: Assume role directly
 eval $(aws sts assume-role \
-  --role-arn arn:aws:iam::PRODUCTION_ACCOUNT_ID:role/OrganizationAccountAccessRole \
+  --role-arn arn:aws:iam::646044945002:role/OrganizationAccountAccessRole \
   --role-session-name production \
   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
   --output text | awk '{print "export AWS_ACCESS_KEY_ID="$1" AWS_SECRET_ACCESS_KEY="$2" AWS_SESSION_TOKEN="$3}')
@@ -216,7 +205,7 @@ cd infrastructure/live/production
 terragrunt run-all apply
 ```
 
-### Step 5: Add GitHub Secrets
+### Step 4: Add GitHub Secrets
 
 Add to your GitHub repository:
 
@@ -235,12 +224,12 @@ Configure your `~/.aws/config`:
 region = ap-southeast-2
 
 [profile kin-shared]
-role_arn = arn:aws:iam::SHARED_ACCOUNT_ID:role/OrganizationAccountAccessRole
+role_arn = arn:aws:iam::216302319215:role/OrganizationAccountAccessRole
 source_profile = kin-management
 region = ap-southeast-2
 
 [profile kin-production]
-role_arn = arn:aws:iam::PRODUCTION_ACCOUNT_ID:role/OrganizationAccountAccessRole
+role_arn = arn:aws:iam::646044945002:role/OrganizationAccountAccessRole
 source_profile = kin-management
 region = ap-southeast-2
 ```
