@@ -108,12 +108,17 @@ data "aws_iam_policy_document" "external_secrets" {
     effect = "Allow"
     actions = [
       "secretsmanager:GetSecretValue",
-      "secretsmanager:DescribeSecret",
-      "secretsmanager:ListSecrets"
+      "secretsmanager:DescribeSecret"
     ]
     resources = [
       "arn:aws:secretsmanager:${var.aws_region}:${local.account_id}:secret:${var.project}/${var.environment}/*"
     ]
+  }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["secretsmanager:ListSecrets"]
+    resources = ["*"]
   }
 }
 
@@ -311,6 +316,8 @@ resource "helm_release" "alb_controller" {
   chart      = "aws-load-balancer-controller"
   version    = "1.16.0"
 
+  depends_on = [aws_eks_pod_identity_association.alb_controller]
+
   set {
     name  = "clusterName"
     value = var.cluster_name
@@ -381,6 +388,8 @@ resource "helm_release" "otel_collector" {
   repository = "https://open-telemetry.github.io/opentelemetry-helm-charts"
   chart      = "opentelemetry-collector"
   version    = "0.142.0"
+
+  depends_on = [aws_eks_pod_identity_association.otel]
 
   values = [<<-EOT
     mode: daemonset
